@@ -19,6 +19,7 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<bool> IsAdmin(int? club_id, int user_id);
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<Club> GetClub(int club_id);
+        public Task<UserModel> GetUserByEmail(String email);
     }
     public class LeagueDataAccess : ILeagueDataAccess
     {
@@ -143,6 +144,12 @@ namespace NetClubApi.Modules.LeagueModule
         public async Task<Club> GetClub(int club_id)
         {
             return await netClubDbContext.club.FirstAsync(club => club.Id == club_id);
+        }
+
+        public async Task<UserModel> GetUserByEmail(string email)
+        {
+            return await netClubDbContext.User_detail.FirstOrDefaultAsync(user => user.Email == email);            
+
         }
     }
 }
