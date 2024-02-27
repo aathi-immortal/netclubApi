@@ -17,7 +17,7 @@ namespace NetClubApi.Model
         public string Email { get; set; }
         public string Phone_number { get; set; }
 
-        public string date_of_birth { get; set; }
+        public DateTime date_of_birth { get; set; }
         public string gender { get; set; }
 
         [NotMapped]

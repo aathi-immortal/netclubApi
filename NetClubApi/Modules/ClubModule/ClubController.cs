@@ -79,9 +79,12 @@ namespace NetClubApi.Modules.ClubModule
         [HttpGet]
         [Authorize]
         //get the list of club rigistered 
-        public async Task<List<RegisterClub>> RegisteredClubs()
+        public async Task<List<RegisterClubModel>> RegisteredClubs()
         {
-                List<RegisterClub> listOfRegisterClubs = new();
+            var userClaims = User.FindFirst("id");
+            int user_id = int.Parse(userClaims.Value);
+            return await _clubDataAccess.getRegisteredClubModel(user_id);
+              /*  List<RegisterClub> listOfRegisterClubs = new();
             try
             {
                 var userClaims = User.FindFirst("id");
@@ -100,7 +103,7 @@ namespace NetClubApi.Modules.ClubModule
             {
                 return listOfRegisterClubs;
 
-            }
+            }*/
         }
 
         [HttpPost]

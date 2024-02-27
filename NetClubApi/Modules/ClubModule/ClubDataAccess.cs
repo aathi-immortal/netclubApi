@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using NetClubApi.Helper;
 using NetClubApi.Model;
+using NetClubApi.Model.ResponseModel;
 using System.Data.SqlTypes;
 
 namespace NetClubApi.Modules.ClubModule
@@ -13,6 +16,7 @@ namespace NetClubApi.Modules.ClubModule
         public Task<string> CreateClub(Club club, int id);
         public Task<List<ClubRegistration>> getRegisteredClub(int id);
         public Task<string> ClubRegistration(Club code, int user_id);
+        public Task<List<RegisterClubModel>> getRegisteredClubModel(int user_id);
     }
 
     public class ClubDataAccess : IClubDataAccess
@@ -100,7 +104,49 @@ namespace NetClubApi.Modules.ClubModule
 
 
         }
+        public async Task<List<RegisterClubModel>> getRegisteredClubModel(int user_id) 
+        {
+            List<RegisterClubModel> registerClub= new List<RegisterClubModel>();
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"
+select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[club_registration].join_date from [dbo].[club_registration] inner join [dbo].[club] on [dbo].[club_registration].club_id=[dbo].[club].id where [dbo].[club_registration].user_id={user_id} and [dbo].[club_registration].isadmin=0";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
 
+                            while (reader.Read())
+                            {
+                                RegisterClubModel club = new RegisterClubModel
+                                 {
+                                     id = (int)reader["id"],
+                                     club_name = (string)reader["club_name"],
+                                     created_by = (string)reader["created_by"],
+                                     join_date= $"{(DateTime)reader["join_date"]}"
+                                 };
+                                registerClub.Add(club);
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            return registerClub;
+        }
 
         public async Task<List<ClubRegistration>> getRegisteredClub(int id)
         {
