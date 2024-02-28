@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using NetClubApi.Model;
 
 namespace NetClubApi.Modules.CourtModule
 {
@@ -6,8 +8,23 @@ namespace NetClubApi.Modules.CourtModule
     [ApiController]
     public class CourtController : ControllerBase
     {
+        private readonly ICourtBussinessLayer _courtBussinessLayer;
 
+        public CourtController(ICourtBussinessLayer courtBussinessLayer)
+        {
+            _courtBussinessLayer = courtBussinessLayer;
+        }
+
+        [HttpPost]
+        [Authorize]
+
+        public async Task<string> CreateCourt(CourtModel court)
+        {
+            return await _courtBussinessLayer.CreateCourt(court);
+        }
 
 
     }
+
+
 }
