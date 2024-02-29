@@ -16,7 +16,6 @@ namespace NetClubApi.Modules.CourtModule
         }
 
         [HttpPost]
-        [Authorize]
 
         public async Task<string> CreateCourt(CourtModel court)
         {

@@ -108,9 +108,9 @@ namespace NetClubApi.Modules.UserModule
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Console.WriteLine(ex.Message);
             }
             return user;
         }
