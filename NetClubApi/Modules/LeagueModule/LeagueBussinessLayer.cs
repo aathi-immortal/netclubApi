@@ -107,14 +107,16 @@ namespace NetClubApi.Modules.LeagueModule
             // check is there any user with  the given email  
             UserModel user = await _dataAccess.GetUserByEmail(email);
             //user is not there
-            if(user == null)
-            {
+            
+            
+
+                
+            
+            
+            
+
                 return await emailSender.SendEmailAsync(email);
-            }
-            else
-            {
-                return await emailSender.SendEmailAsync(email);
-            }
+           
         }
     }
 }
