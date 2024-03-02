@@ -1,25 +1,35 @@
 ﻿using NetClubApi.Model;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace NetClubApi.Modules.CourtModule
 {
     public interface ICourtDataAccess
     {
-        public Task<string> CreateCourt(CourtModel court);
+        Task<string> CreateCourt(CourtModel court);
+        Task<List<CourtModel>> GetAllCourts();
     }
+
     public class CourtDataAccess : ICourtDataAccess
     {
-        private readonly NetClubDbContext netClubDbContext;
+        private readonly NetClubDbContext _netClubDbContext;
+
         public CourtDataAccess(NetClubDbContext netClubDbContext)
         {
-            this.netClubDbContext = netClubDbContext;
+            _netClubDbContext = netClubDbContext;
         }
+
         public async Task<string> CreateCourt(CourtModel court)
         {
-            await netClubDbContext.AddAsync(court);
-            netClubDbContext.SaveChanges();
+            await _netClubDbContext.AddAsync(court);
+            await _netClubDbContext.SaveChangesAsync();
             return "Court created";
         }
 
-
+        public async Task<List<CourtModel>> GetAllCourts()
+        {
+            return await _netClubDbContext.court.ToListAsync();
+        }
     }
 }
