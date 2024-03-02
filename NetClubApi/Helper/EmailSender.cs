@@ -5,7 +5,7 @@ using MimeKit;
 
 public interface IEmailSender
 {
-    public Task<string> SendEmailAsync(string email);
+    public Task<string> SendEmailAsync(string email, String url);
 
 }
 
@@ -14,7 +14,7 @@ public class EmailSender : IEmailSender
 
     
     
-    public async Task<string> SendEmailAsync(string email)
+    public async Task<string> SendEmailAsync(string email, String url)
     {
         
 
@@ -27,7 +27,7 @@ public class EmailSender : IEmailSender
             // Load the HTML template
             string htmlTemplate = EmailTemplates.ProfessionalEmailTemplate;
 
-        
+            htmlTemplate.Replace("{join_url}", url);
             
             
             

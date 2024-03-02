@@ -11,7 +11,7 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<List<LeagueResponse>> ConvertToLeagueResponse(List<League> leagues);
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<List<MyLeagues>> GetMyLeagues(int user_id);
-        public Task<string> InvitePlayer(string email);
+        public Task<string> InvitePlayer(string email,String url);
     }
 
 
@@ -102,10 +102,10 @@ namespace NetClubApi.Modules.LeagueModule
             return league.name;
         }
 
-        public async Task<string> InvitePlayer(string email)
+        public async Task<string> InvitePlayer(string email, String url)
         {
             // check is there any user with  the given email  
-            UserModel user = await _dataAccess.GetUserByEmail(email);
+            //UserModel user = await _dataAccess.GetUserByEmail(email);
             //user is not there
             
             
@@ -115,7 +115,7 @@ namespace NetClubApi.Modules.LeagueModule
             
             
 
-                return await emailSender.SendEmailAsync(email);
+                return await emailSender.SendEmailAsync(email,url);
            
         }
     }
