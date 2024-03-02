@@ -21,7 +21,23 @@ namespace NetClubApi.Modules.TeamModule
         }
         public async Task<string> CreateTeam(TeamModel team,int user_id)
         {
-            return await _teamDataAccess.CreateTeam(team,user_id);
+            bool isAlreadyExist = await _teamDataAccess.checkTeamLeague(team.league_id, user_id);
+            if (isAlreadyExist)
+            {
+                return "Already in League Team";
+            }
+            else
+            {
+                bool isSingles=await _teamDataAccess.checkLeagueType(team.league_id);
+                if (isSingles)
+                {
+                return await _teamDataAccess.CreateTeam(team,user_id);
+                }
+                else
+                {
+                    return "Two player required";
+                }
+            }
         }
 
         public async Task<string> AddTeamMember(AddMember members)

@@ -11,6 +11,8 @@ namespace NetClubApi.Modules.TeamModule
 
         public Task<string> AddMember(AddMember members);
         public Task<List<TeamModel>> GetLeagueTeams(int league_id);
+        public Task<bool> checkTeamLeague(int league_id, int user_id);
+        public Task<bool>  checkLeagueType(int league_id);
     }
     public class TeamDataAccess:ITeamDataAccess
     {
@@ -82,6 +84,88 @@ namespace NetClubApi.Modules.TeamModule
                 return Task.FromResult($"Team creation not added{ex.Message}");
             }
         }
+        public async Task<bool> checkTeamLeague(int league_id, int user_id)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[team].league_id,[dbo].[team_member].team_member_user_id from [dbo].[team] INNER JOIN [dbo].[team_member] on [dbo].[team].team_id=[dbo].[team_member].team_id where [dbo].[team_member].team_member_user_id={user_id} and [dbo].[team].league_id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            Console.WriteLine("Already in League team");
+                            return true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("new League team");
+                            return false;
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return true;
+                throw;
+            }
+        }
+        public async Task<bool> checkLeagueType(int league_id)
+        {
+            bool isSingle = false;
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[league].league_type_id from  [dbo].[league] where [dbo].[league].id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                for(int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    Console.WriteLine(reader.GetName(i));
+                                    Console.WriteLine(reader.GetValue(i));
+                                }
+                                int league_type = (int)reader["league_type_id"];
+                                if (league_type == 1 || league_type == 2)
+                                {
+                                    isSingle=true;
+                                }
+                                else
+                                {
+                                    isSingle = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            isSingle=false;
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+                return isSingle;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                isSingle=false;
+                return isSingle;
+            }
+        }
         public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
         {/*
             List<TeamModel> teams= new List<TeamModel>();
@@ -129,16 +213,3 @@ namespace NetClubApi.Modules.TeamModule
         }
     }
 }
-
-
-/* using (SqlConnection myCon = sqlHelper.GetConnection())
- {
-     myCon.Open();
-     string sql1 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id, team_id)
-                    VALUES ('{team.team_member_user_id[0]}','{team.team_id}')";
-     using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
-     {
-         myCommand1.ExecuteNonQuery();
-     }
-     myCon.Close();
- }*/
