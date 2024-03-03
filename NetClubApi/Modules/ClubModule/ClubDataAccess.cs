@@ -17,6 +17,7 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<ClubRegistration>> getRegisteredClub(int id);
         public Task<string> ClubRegistration(Club code, int user_id);
         public Task<List<RegisterClubModel>> getRegisteredClubModel(int user_id);
+        public Task<string> getClubLabel(int club_id);
     }
 
     public class ClubDataAccess : IClubDataAccess
@@ -113,7 +114,7 @@ namespace NetClubApi.Modules.ClubModule
                 {
                     myCon.Open();
                     string sql2 = $@"
-select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[club_registration].join_date from [dbo].[club_registration] inner join [dbo].[club] on [dbo].[club_registration].club_id=[dbo].[club].id where [dbo].[club_registration].user_id={user_id} and [dbo].[club_registration].isadmin=0";
+select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[club_registration].join_date,[dbo].[club].club_label from [dbo].[club_registration] inner join [dbo].[club] on [dbo].[club_registration].club_id=[dbo].[club].id where [dbo].[club_registration].user_id={user_id} and [dbo].[club_registration].isadmin=0";
                     using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
                     {
                         SqlDataReader reader = myCommand.ExecuteReader();
@@ -127,7 +128,8 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                                      id = (int)reader["id"],
                                      club_name = (string)reader["club_name"],
                                      created_by = (string)reader["created_by"],
-                                     join_date= $"{(DateTime)reader["join_date"]}"
+                                     join_date= $"{(DateTime)reader["join_date"]}",
+                                    club_label = (string)reader["club_label"]
                                  };
                                 registerClub.Add(club);
                             }
@@ -233,6 +235,12 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
             {
                 return false;
             }
+        }
+
+        public async Task<string> getClubLabel(int club_id)
+        {
+            var club = await _netClubDbContext.club.FirstOrDefaultAsync(club => club.Id== club_id);
+           return club.club_label;
         }
     }
 }

@@ -7,15 +7,19 @@ namespace NetClubApi.Modules.TeamModule
 {
     public interface ITeamDataAccess
     {
-        public Task<string> CreateTeam(TeamModel team,int user_id);
+        public Task<int> CreateTeam(TeamModel team,int user_id);
 
         public Task<string> AddMember(AddMember members);
         public Task<List<TeamModel>> GetLeagueTeams(int league_id);
+        public Task<bool> checkTeamLeague(int league_id, int user_id);
+        public Task<bool>  checkLeagueType(int league_id);
+        public  Task<string> GetTeamName(int user_id);
     }
     public class TeamDataAccess:ITeamDataAccess
     {
-        public Task<string> CreateTeam(TeamModel team,int user_id)
+        public Task<int> CreateTeam(TeamModel team,int user_id)
         {
+            int insertedId = 0;
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -30,7 +34,7 @@ namespace NetClubApi.Modules.TeamModule
                         object result = myCommand1.ExecuteScalar();
                         if (result != null)
                         {
-                            int insertedId = Convert.ToInt32(result);
+                            insertedId = Convert.ToInt32(result);
                             string sql2 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id,team_id)
                                    VALUES ('{user_id}','{insertedId}')";
                             using (SqlCommand myCommand2 = new SqlCommand(sql2, myCon))
@@ -44,10 +48,10 @@ namespace NetClubApi.Modules.TeamModule
                     
                     myCon.Close();
                 }
-                return Task.FromResult("Team created");
+                return Task.FromResult(insertedId);
             }catch(Exception ex)
             {
-                return Task.FromResult("Team creation failed");
+                return Task.FromResult(insertedId);
             }
         }
 
@@ -80,6 +84,114 @@ namespace NetClubApi.Modules.TeamModule
             catch (Exception ex)
             {
                 return Task.FromResult($"Team creation not added{ex.Message}");
+            }
+        }
+        public async Task<bool> checkTeamLeague(int league_id, int user_id)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[team].league_id,[dbo].[team_member].team_member_user_id from [dbo].[team] INNER JOIN [dbo].[team_member] on [dbo].[team].team_id=[dbo].[team_member].team_id where [dbo].[team_member].team_member_user_id={user_id} and [dbo].[team].league_id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            Console.WriteLine("Already in League team");
+                            return true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("new League team");
+                            return false;
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return true;
+                throw;
+            }
+        }
+        public async Task<bool> checkLeagueType(int league_id)
+        {
+            bool isSingle = false;
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[league].league_type_id from  [dbo].[league] where [dbo].[league].id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int league_type = (int)reader["league_type_id"];
+                                if (league_type == 1 || league_type == 2)
+                                {
+                                    isSingle=true;
+                                }
+                                else
+                                {
+                                    isSingle = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            isSingle=false;
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+                return isSingle;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                isSingle=false;
+                return isSingle;
+            }
+        }
+        public async Task<string> GetTeamName(int user_id)
+        {
+            string user_name = "";
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[user_detail].user_name from  [dbo].[user_detail] where [dbo].[user_detail].Id={user_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                user_name= (string)reader["user_name"];
+                            }
+                        }
+                        reader.Close();
+                        myCon.Close();
+                    }
+                }
+                return user_name;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return user_name;
             }
         }
         public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
@@ -129,16 +241,3 @@ namespace NetClubApi.Modules.TeamModule
         }
     }
 }
-
-
-/* using (SqlConnection myCon = sqlHelper.GetConnection())
- {
-     myCon.Open();
-     string sql1 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id, team_id)
-                    VALUES ('{team.team_member_user_id[0]}','{team.team_id}')";
-     using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
-     {
-         myCommand1.ExecuteNonQuery();
-     }
-     myCon.Close();
- }*/
