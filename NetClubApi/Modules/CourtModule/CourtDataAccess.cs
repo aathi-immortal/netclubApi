@@ -9,6 +9,8 @@ namespace NetClubApi.Modules.CourtModule
     {
         Task<string> CreateCourt(CourtModel court);
         Task<List<CourtModel>> GetAllCourts();
+        Task<string> ApproveCourt(int courtId);
+        Task<List<CourtModel>> GetApprovedCourts();
     }
 
     public class CourtDataAccess : ICourtDataAccess
@@ -31,5 +33,27 @@ namespace NetClubApi.Modules.CourtModule
         {
             return await _netClubDbContext.court.ToListAsync();
         }
+        public async Task<string> ApproveCourt(int courtId)
+        {
+            var court = await _netClubDbContext.court.FindAsync(courtId);
+            if (court != null)
+            {
+                _netClubDbContext.court.Remove(court);
+                await _netClubDbContext.SaveChangesAsync();
+                return "Court approved and removed from created courts";
+            }
+            else
+            {
+                return "Court not found";
+            }
+        }
+        public async Task<List<CourtModel>> GetApprovedCourts()
+        {
+            // Implement a way to retrieve approved courts, such as querying from a different table or using a flag.
+            // For simplicity, we'll return an empty list.
+            return new List<CourtModel>();
+        }
+
+
     }
 }

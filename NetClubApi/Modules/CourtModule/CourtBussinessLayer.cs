@@ -8,6 +8,8 @@ namespace NetClubApi.Modules.CourtModule
     {
         Task<string> CreateCourt(CourtModel court);
         Task<List<CourtModel>> GetAllCourts();
+        Task<string> ApproveCourt(int courtId);
+        Task<List<CourtModel>> GetApprovedCourts();
     }
     public class CourtBusinessLayer : ICourtBussinessLayer
     {
@@ -26,6 +28,15 @@ namespace NetClubApi.Modules.CourtModule
         public async Task<List<CourtModel>> GetAllCourts()
         {
             return await _courtDataAccess.GetAllCourts();
+        }
+        public async Task<string> ApproveCourt(int courtId)
+        {
+            return await _courtDataAccess.ApproveCourt(courtId);
+        }
+
+        public async Task<List<CourtModel>> GetApprovedCourts()
+        {
+            return await _courtDataAccess.GetApprovedCourts();
         }
     }
 }
