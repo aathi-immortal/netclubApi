@@ -694,7 +694,7 @@ public static class EmailTemplates
                       <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                       <div align=""center"">
                         <!--[if mso]><v:roundrect xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:w=""urn:schemas-microsoft-com:office:word"" href=""https://www.unlayer.com"" style=""height:37px; v-text-anchor:middle; width:168px;"" arcsize=""11%""  stroke=""f"" fillcolor=""#ce0f0f""><w:anchorlock/><center style=""color:#FFFFFF;""><![endif]-->
-                        <a href={join_url} target=""_blank"" class=""v-button v-size-width v-font-size""
+                        <a href=""url_placeholder"" target=""_blank"" class=""v-button v-size-width v-font-size""
                           style=""box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #ce0f0f; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:29%; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;"">
                           <span class=""v-line-height v-padding""
                             style=""display:block;padding:10px 20px;line-height:120%;""><span
