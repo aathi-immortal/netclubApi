@@ -7,6 +7,7 @@
         public int? TotalLeagues { get; set; }
         public int? Teams { get; set; }
         public int? ActiveLeagues { get; set; }
-        
+        public string? club_label{ get; set; }
+
     }
 }

@@ -17,6 +17,6 @@ namespace NetClubApi.Model
 
         public string zip { get; set; }
 
-      
+
     }
 }
