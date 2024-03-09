@@ -27,21 +27,17 @@ namespace NetClubApi.Modules.CourtModule
         {
             return await _courtBussinessLayer.GetAllCourts();
         }
-        [HttpPost("Approve/{courtId}")]
+        [HttpGet("approved")]
+        public async Task<List<CourtModel>> GetApprovedCourts()
+        {
+            return await _courtBussinessLayer.GetApprovedCourts();
+        }
+
+        [HttpPost("approve/{courtId}")]
         public async Task<IActionResult> ApproveCourt(int courtId)
         {
-            var result = await _courtBussinessLayer.ApproveCourt(courtId);
-            return Ok(result);
-        }
-        [HttpGet("ApprovedCourts")]
-        public async Task<ActionResult<List<CourtModel>>> GetApprovedCourts()
-        {
-            var approvedCourts = await _courtBussinessLayer.GetApprovedCourts();
-            if (approvedCourts == null || approvedCourts.Count == 0)
-            {
-                return NotFound("No approved courts found.");
-            }
-            return Ok(approvedCourts);
+            await _courtBussinessLayer.ApproveCourt(courtId);
+            return Ok("Court approved");
         }
     }
 }
