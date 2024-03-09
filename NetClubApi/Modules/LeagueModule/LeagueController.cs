@@ -37,7 +37,7 @@ namespace NetClubApi.Modules.LeagueModule
 
         [HttpGet]
         [Authorize]
-        public async Task<int?> GetLeagueTeams(int league_id)
+        public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
         {
             return await _leagueBussinessLayer.GetLeagueTeams(league_id);
         }
@@ -57,6 +57,16 @@ namespace NetClubApi.Modules.LeagueModule
             int user_id = int.Parse(User.FindFirst("id").Value);
             return await _leagueBussinessLayer.GetMyLeagues(user_id);
 
+        }
+
+
+
+        //this action is used to invite the player to your team using invitation email
+        [HttpGet]
+        [Authorize]
+        public async Task<String> InvitePlayer(String email,String url)
+        {
+            return await  _leagueBussinessLayer.InvitePlayer(email,url);
         }
 
     }

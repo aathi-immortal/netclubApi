@@ -15,15 +15,26 @@ namespace NetClubApi.Modules.TeamModule
             _teamBussinessLogics = teamBussinessLogic;
         }
         [HttpPost]
-        public async Task<string> CreateTeam(TeamModel team)
+        public async Task<int> CreateTeam(TeamModel team)
         {
-            return await _teamBussinessLogics.CreateTeam(team);
-;       }
+            int user_id = int.Parse(User.FindFirst("id").Value);
+            return await _teamBussinessLogics.CreateTeam(team, user_id);
+            ; }
 
         [HttpPost]
         public async Task<string> AddTeamMembers(AddMember members)
         {
             return await _teamBussinessLogics.AddTeamMember(members);
+        }
+        [HttpGet]
+        public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
+        {
+            return await _teamBussinessLogics.GetLeagueTeams(league_id);
+        }
+        [HttpPost]
+        public async Task<string> JoinDoubles(TeamDoubles team)
+        {
+            return await _teamBussinessLogics.JoinDoubles(team);
         }
     }
 }

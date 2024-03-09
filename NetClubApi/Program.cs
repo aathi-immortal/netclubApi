@@ -12,6 +12,7 @@ using NetClubApi.Modules.LeagueModule;
 using NetClubApi.Modules.ClubModule;
 using NetClubApi.Modules.MatchModule;
 using NetClubApi.Modules.UserModule;
+using NetClubApi.Modules.CourtModule;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,10 +25,11 @@ builder.Services.AddTransient<IClubBussinessLogics, ClubBussinessLogic>();
 builder.Services.AddTransient<IMatchBusinessLogic, MatchBusinessLogic>();
 builder.Services.AddTransient<ITeamBusinessLogic, TeamBusinessLogic>();
 builder.Services.AddTransient<IClubDataAccess,ClubDataAccess>();
-
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddTransient<ILeagueBussinessLayer, LeagueBussinessLayer>();
 builder.Services.AddTransient<ILeagueDataAccess, LeagueDataAccess>();
-
+builder.Services.AddTransient<ICourtBussinessLayer, CourtBusinessLayer>();
+builder.Services.AddTransient<ICourtDataAccess, CourtDataAccess>();
 builder.Services.AddTransient<IMatchDataAccess, MatchDataAccess>();
 builder.Services.AddTransient<ITeamDataAccess, TeamDataAccess>();
 
