@@ -27,14 +27,14 @@ public class EmailSender : IEmailSender
             // Load the HTML template
             string htmlTemplate = EmailTemplates.ProfessionalEmailTemplate;
 
-            htmlTemplate.Replace("{join_url}", url);
-            
-            
-            
+            htmlTemplate =  htmlTemplate.Replace("url_placeholder", url);
 
             
+
+
+
             // Replace placeholders with actual values
-            
+
             // Embedding Images in C# Code
             //var mapImagePart = new MimePart("image", "png")
             //{
