@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NetClubApi.Model
 {
     public class CourtModel
     {
         [Key]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int court_id { get; set; }
         public string court_name { get; set; }
         public string address1 { get; set; }
@@ -17,6 +19,7 @@ namespace NetClubApi.Model
 
         public string zip { get; set; }
 
+        public bool approved { get; set; }
 
     }
 }
