@@ -71,6 +71,7 @@ namespace NetClubApi.Modules.ClubModule
                             myclub.TotalLeagues = 0;
                             myclub.ActiveLeagues = 0;
                             myclub.Teams = 0;
+                            myclub.club_label = clubdetails.club_label;
 
                             listOfClubs.Add(myclub);
                         }

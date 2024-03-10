@@ -46,7 +46,8 @@ namespace NetClubApi.Modules.UserModule
                                     user.Last_name = (string)reader["last_name"];
                                     user.User_name = (string)reader["user_name"];
                                     user.gender = (string)reader["gender"];
-                                    user.date_of_birth = $"{(DateTime)reader["date_of_birth"]}";
+                                    //user.date_of_birth = Convert.ToDateTime(reader["date_of_birth"]);
+                                    user.date_of_birth = (DateTime)reader["date_of_birth"];
                                     user.Message.Add("valid password");
                                     user.IsSuccess = true;
                                 }
@@ -108,9 +109,9 @@ namespace NetClubApi.Modules.UserModule
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Console.WriteLine(ex.Message);
             }
             return user;
         }

@@ -7,17 +7,19 @@ namespace NetClubApi.Modules.TeamModule
 {
     public interface ITeamDataAccess
     {
-        public Task<string> CreateTeam(TeamModel team,int user_id);
+        public Task<int> CreateTeam(TeamModel team,int user_id);
 
         public Task<string> AddMember(AddMember members);
         public Task<List<TeamModel>> GetLeagueTeams(int league_id);
         public Task<bool> checkTeamLeague(int league_id, int user_id);
         public Task<bool>  checkLeagueType(int league_id);
+        public  Task<string> GetTeamName(int user_id);
     }
     public class TeamDataAccess:ITeamDataAccess
     {
-        public Task<string> CreateTeam(TeamModel team,int user_id)
+        public Task<int> CreateTeam(TeamModel team,int user_id)
         {
+            int insertedId = 0;
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -32,7 +34,7 @@ namespace NetClubApi.Modules.TeamModule
                         object result = myCommand1.ExecuteScalar();
                         if (result != null)
                         {
-                            int insertedId = Convert.ToInt32(result);
+                            insertedId = Convert.ToInt32(result);
                             string sql2 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id,team_id)
                                    VALUES ('{user_id}','{insertedId}')";
                             using (SqlCommand myCommand2 = new SqlCommand(sql2, myCon))
@@ -46,10 +48,10 @@ namespace NetClubApi.Modules.TeamModule
                     
                     myCon.Close();
                 }
-                return Task.FromResult("Team created");
+                return Task.FromResult(insertedId);
             }catch(Exception ex)
             {
-                return Task.FromResult("Team creation failed");
+                return Task.FromResult(insertedId);
             }
         }
 
@@ -133,11 +135,6 @@ namespace NetClubApi.Modules.TeamModule
                         {
                             while (reader.Read())
                             {
-                                for(int i = 0; i < reader.FieldCount; i++)
-                                {
-                                    Console.WriteLine(reader.GetName(i));
-                                    Console.WriteLine(reader.GetValue(i));
-                                }
                                 int league_type = (int)reader["league_type_id"];
                                 if (league_type == 1 || league_type == 2)
                                 {
@@ -164,6 +161,37 @@ namespace NetClubApi.Modules.TeamModule
                 Console.WriteLine(ex.Message);
                 isSingle=false;
                 return isSingle;
+            }
+        }
+        public async Task<string> GetTeamName(int user_id)
+        {
+            string user_name = "";
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[user_detail].user_name from  [dbo].[user_detail] where [dbo].[user_detail].Id={user_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                user_name= (string)reader["user_name"];
+                            }
+                        }
+                        reader.Close();
+                        myCon.Close();
+                    }
+                }
+                return user_name;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return user_name;
             }
         }
         public async Task<List<TeamModel>> GetLeagueTeams(int league_id)

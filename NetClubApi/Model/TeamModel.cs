@@ -18,4 +18,10 @@ namespace NetClubApi.Model
         public List<int> team_member_user_id { get; set; }
 
     }
+    public class TeamDoubles: TeamModel
+    {
+        public int player1 { get; set; }
+        public int player2 { get; set; }
+
+    }
 }
