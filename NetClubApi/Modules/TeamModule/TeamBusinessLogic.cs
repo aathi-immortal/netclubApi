@@ -65,7 +65,7 @@ namespace NetClubApi.Modules.TeamModule
             //player 2
             bool isAlreadyExist2 = await _teamDataAccess.checkTeamLeague(team_doubles.league_id, team_doubles.player2);
             if (isAlreadyExist2){return "Player- 2 Already exist";}
-            if (!isAlreadyExist1 && !isAlreadyExist2)
+            if (!isAlreadyExist1 && !isAlreadyExist2  && team_doubles.player1!=0 && team_doubles.player2 != 0)
             {
                 string teamName =await _teamDataAccess.GetTeamName(team_doubles.player1);
                 TeamModel team = new TeamModel
@@ -98,6 +98,10 @@ namespace NetClubApi.Modules.TeamModule
                     };
                     await AddTeamMember(member);
                 }
+            }
+            else
+            {
+                return "Player already in Team";
             }
             return "Hello";
         }
