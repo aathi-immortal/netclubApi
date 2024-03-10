@@ -59,5 +59,15 @@ namespace NetClubApi.Modules.LeagueModule
 
         }
 
+
+
+        //this action is used to invite the player to your team using invitation email
+        [HttpGet]
+        //[Authorize]
+        public async Task<String> InvitePlayer(String email,String url)
+        {
+            return await  _leagueBussinessLayer.InvitePlayer(email,url);
+        }
+
     }
 }

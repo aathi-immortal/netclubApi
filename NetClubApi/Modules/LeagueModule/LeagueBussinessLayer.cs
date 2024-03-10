@@ -11,16 +11,19 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<List<LeagueResponse>> ConvertToLeagueResponse(List<League> leagues);
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<List<MyLeagues>> GetMyLeagues(int user_id);
+        public Task<string> InvitePlayer(string email,String url);
     }
 
 
     public class LeagueBussinessLayer : ILeagueBussinessLayer
     {
         private readonly ILeagueDataAccess _dataAccess;
+        private readonly IEmailSender emailSender;
 
-        public LeagueBussinessLayer(ILeagueDataAccess dataAccess)
+        public LeagueBussinessLayer(ILeagueDataAccess dataAccess,IEmailSender emailSender)
         {
-            _dataAccess = dataAccess;
+            this._dataAccess = dataAccess;
+            this.emailSender = emailSender;
         }
         public async Task<string> CreateLeague(League league, int user_id)
         {
@@ -97,6 +100,23 @@ namespace NetClubApi.Modules.LeagueModule
         private string GetLeagueName(League league)
         {
             return league.name;
+        }
+
+        public async Task<string> InvitePlayer(string email, String url)
+        {
+            // check is there any user with  the given email  
+            //UserModel user = await _dataAccess.GetUserByEmail(email);
+            //user is not there
+            
+            
+
+                
+            
+            
+            
+
+                return await emailSender.SendEmailAsync(email,url);
+           
         }
     }
 }
