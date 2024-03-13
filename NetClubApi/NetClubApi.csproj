@@ -16,8 +16,10 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>12</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<ErrorReport>prompt</ErrorReport>
 	</PropertyGroup>
 
 	<ItemGroup>
