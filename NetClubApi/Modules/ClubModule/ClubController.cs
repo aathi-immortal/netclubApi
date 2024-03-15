@@ -108,19 +108,26 @@ namespace NetClubApi.Modules.ClubModule
 
         [HttpPost]
         [Authorize]
-        //add to club action
-        public async Task<IActionResult> JoinClub(Club club)
+        //add to club
+        public async Task<IActionResult> JoinClub(string club_label)
         {
             try
             {
                 var claim = User.FindFirst("id");
-                //Console.WriteLine(claim.Value);
-                return Ok(await _clubDataAccess.ClubRegistration(club, int.Parse(claim.Value)));
+                return Ok(await _clubDataAccess.ClubRegistration(club_label, int.Parse(claim.Value)));
             }
-            catch (Exception ex)
+            catch (Exception ex){return Ok(ex.Message);}
+        }
+        [HttpGet]
+       // [Authorize]
+        //get the list of club member for given club label
+        public async Task<List<ClubMember>> ClubMembers(int club_id)
+        {
+            try
             {
-                return Ok(ex.Message);
+                return await _clubDataAccess.getClubMember(club_id);
             }
+            catch (Exception ex) { Console.WriteLine(ex.Message); return []; }
         }
 
 
