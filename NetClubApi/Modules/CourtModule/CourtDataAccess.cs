@@ -11,6 +11,8 @@ namespace NetClubApi.Modules.CourtModule
         Task<List<CourtModel>> GetAllCourts();
         Task<List<CourtModel>> GetApprovedCourts();
         Task ApproveCourt(int courtId);
+
+        Task<CourtModel> GetCourtByZip(int zip);
     }
 
     public class CourtDataAccess : ICourtDataAccess
@@ -20,6 +22,11 @@ namespace NetClubApi.Modules.CourtModule
         public CourtDataAccess(NetClubDbContext netClubDbContext)
         {
             _netClubDbContext = netClubDbContext;
+        }
+
+        public async Task<CourtModel> GetCourtByZip(int zip)
+        {
+            return await _netClubDbContext.court.FirstOrDefaultAsync(c => c.zip == zip);
         }
 
         public async Task<string> CreateCourt(CourtModel court)

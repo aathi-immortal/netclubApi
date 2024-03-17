@@ -10,6 +10,7 @@ namespace NetClubApi.Modules.CourtModule
         Task<List<CourtModel>> GetAllCourts(); 
         Task<List<CourtModel>> GetApprovedCourts();
         Task ApproveCourt(int courtId);
+      
     }
     public class CourtBusinessLayer : ICourtBussinessLayer
     {
@@ -22,6 +23,11 @@ namespace NetClubApi.Modules.CourtModule
 
         public async Task<string> CreateCourt(CourtModel court)
         {
+            var existingCourtWithSameZip = await _courtDataAccess.GetCourtByZip(court.zip);
+            if (existingCourtWithSameZip != null)
+            {
+                return "Court with the same zip code already exists.";
+            }
             return await _courtDataAccess.CreateCourt(court);
         }
 

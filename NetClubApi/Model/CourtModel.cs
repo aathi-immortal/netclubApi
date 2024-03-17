@@ -17,7 +17,7 @@ namespace NetClubApi.Model
 
         public string state { get; set; }
 
-        public string zip { get; set; }
+        public int zip { get; set; }
 
         public bool approved { get; set; }
 
