@@ -23,8 +23,8 @@ namespace NetClubApi.Modules.MatchModule
                 {
                     myCon.Open();
                    
-                    string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
-                                   VALUES ({match.club_id},{1},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
+                   // string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
+                    //               VALUES ({match.club_id},{match.league_id},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
                     string sql3= @"INSERT INTO[match]
                                         (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating)
                                         VALUES
@@ -32,14 +32,14 @@ namespace NetClubApi.Modules.MatchModule
                     using (SqlCommand cmd = new SqlCommand(sql3, myCon))
                     {
                         cmd.Parameters.AddWithValue("@ClubId", 38);
-                        cmd.Parameters.AddWithValue("@LeagueId", 1);
-                        cmd.Parameters.AddWithValue("@Team1Id", 1);
-                        cmd.Parameters.AddWithValue("@Team2Id", 1);
+                        cmd.Parameters.AddWithValue("@LeagueId",match.league_id);
+                        cmd.Parameters.AddWithValue("@Team1Id", match.team1_id);
+                        cmd.Parameters.AddWithValue("@Team2Id", match.team2_id);
                         cmd.Parameters.AddWithValue("@Player1Id", match.player1_id);
                         cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
                         cmd.Parameters.AddWithValue("@StartDate", match.start_date);
                         cmd.Parameters.AddWithValue("@EndDate", match.end_date);
-                        cmd.Parameters.AddWithValue("@CourtId", match.court_id);
+                        cmd.Parameters.AddWithValue("@CourtId", 1);
                         cmd.Parameters.AddWithValue("@Point", match.point);
                         cmd.Parameters.AddWithValue("@Rating", match.rating);
 
