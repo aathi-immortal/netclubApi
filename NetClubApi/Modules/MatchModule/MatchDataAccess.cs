@@ -9,7 +9,9 @@ namespace NetClubApi.Modules.MatchModule
         public Task<string> createMatch(MatchModel match);
         public Task<List<Schedule>> getSchedule(int league_id);
         public Task<List<Schedule>> getMyMatches(int user_id);
-
+        public Task<MatchModel> CreateMatch(MatchModel match);
+        public Task<int> GetTeamPlayerId(int team_id);
+        public Task<bool> isAlreadyScheduled(int leagueId);
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -21,7 +23,7 @@ namespace NetClubApi.Modules.MatchModule
                 {
                     myCon.Open();
                     string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
-                                   VALUES ('{match.club_id}','{match.league_id}','{match.team1_id}',    '{match.team2_id}','{match.player1_id}','{match.player2_id}','{match.start_date}','{match.end_date}','{match.court_id}',{0})";
+                                   VALUES ({match.club_id},{1},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
                     using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
                     {
                         myCommand1.ExecuteNonQuery();
@@ -156,5 +158,125 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
             return Task.FromResult(matches);
         }
+
+
+        public async Task<MatchModel> CreateMatch(MatchModel match)
+        {
+            try
+            {
+                Console.WriteLine("jiiii");
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+
+                    string insertQuery = @"INSERT INTO [match] 
+                                        (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating) 
+                                        VALUES 
+                                        (@ClubId, @LeagueId, @Team1Id, @Team2Id, @Player1Id, @Player2Id, @StartDate, @EndDate, @CourtId, @Point, @Rating); 
+                                        SELECT SCOPE_IDENTITY();";
+
+                    using (SqlCommand cmd = new SqlCommand(insertQuery, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@ClubId", 38);
+                        cmd.Parameters.AddWithValue("@LeagueId", 1);
+                        cmd.Parameters.AddWithValue("@Team1Id", 1);
+                        cmd.Parameters.AddWithValue("@Team2Id",1);
+                        cmd.Parameters.AddWithValue("@Player1Id", match.player1_id);
+                        cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
+                        cmd.Parameters.AddWithValue("@StartDate", match.start_date);
+                        cmd.Parameters.AddWithValue("@EndDate", match.end_date);
+                        cmd.Parameters.AddWithValue("@CourtId", match.court_id);
+                        cmd.Parameters.AddWithValue("@Point", match.point);
+                        cmd.Parameters.AddWithValue("@Rating", match.rating);
+
+                        // Execute the command and retrieve the newly inserted match ID
+                        int matchId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+
+                        // Set the match_id property of the match object
+                        match.match_id = matchId;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Optionally, you might want to throw the exception to propagate it further
+                throw;
+            }
+
+            return match;
+
+        }
+
+        public async Task<int> GetTeamPlayerId(int team_id)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+
+                    string selectQuery = "SELECT team_member_user_id FROM team_member WHERE team_id = @TeamId";
+
+                    using (SqlCommand cmd = new SqlCommand(selectQuery, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@TeamId", team_id);
+
+
+                        object result = await cmd.ExecuteScalarAsync();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+
+                            return Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return -1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Optionally, you might want to throw the exception to propagate it further
+                throw;
+            }
+        }
+
+        public async Task<bool> isAlreadyScheduled(int leagueId)
+        {
+
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+
+                    string query = "SELECT COUNT(*) FROM [match] WHERE league_id = @LeagueId";
+                    using (SqlCommand cmd = new SqlCommand(query, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@LeagueId", leagueId);
+
+                        // Execute the query to check if any rows exist with the specified league ID
+                        int count = (int)await cmd.ExecuteScalarAsync();
+
+                        // If count is greater than 0, it means there are rows with the league ID
+                        // Return true indicating that scheduling for this league is already done
+                        return count > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Optionally, you might want to throw the exception to propagate it further
+                throw;
+            }
+
+        }
     }
 }
+
+

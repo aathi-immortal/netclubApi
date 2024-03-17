@@ -62,5 +62,12 @@ namespace NetClubApi.Modules.MatchModule
             // int user_id = 25;
             return await _matchBussinessLogics.getMyMatches(user_id);
         }
+
+        [HttpGet]
+        // schedule action
+        public async Task<String> ScheduleMatch(int clubId, int leagueId)
+        {
+            return await _matchBussinessLogics.ScheduleMatch(clubId,leagueId);
+        }
     }
 }

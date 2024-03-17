@@ -70,12 +70,8 @@ namespace NetClubApi.Modules.LeagueModule
         }
 
 
-        [HttpGet]
-        // schedule action
-        public async Task<List<MatchModel>> ScheduleMatch(int clubId,int leagueId)
-        {
-            return await _leagueBussinessLayer.ScheduleMatch(clubId, leagueId);
-        }
+        
+        
 
     }
 }

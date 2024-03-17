@@ -14,8 +14,8 @@ namespace NetClubApi.Model
         public int  team2_id{ get; set; }
         public int player1_id { get; set; }
         public int player2_id { get; set; }
-        public string start_date { get; set; }
-        public string end_date { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime  end_date { get; set; }
         public int court_id { get; set; }
 
         public int point { get; set; }
