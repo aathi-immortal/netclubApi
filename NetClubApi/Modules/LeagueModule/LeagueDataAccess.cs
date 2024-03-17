@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NetClubApi.Helper;
 using NetClubApi.Model;
 using NetClubApi.Model.ResponseModel;
+using System.Text.RegularExpressions;
 
 namespace NetClubApi.Modules.LeagueModule
 {
@@ -20,6 +21,8 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<Club> GetClub(int club_id);
         public Task<UserModel> GetUserByEmail(String email);
+        public Task<MatchModel> CreateMatch(MatchModel match);
+        public Task<int> GetTeamPlayerId(int team_id);
     }
     public class LeagueDataAccess : ILeagueDataAccess
     {
@@ -151,5 +154,91 @@ namespace NetClubApi.Modules.LeagueModule
             return await netClubDbContext.User_detail.FirstOrDefaultAsync(user => user.Email == email);            
 
         }
-    }
+
+        public async Task<MatchModel> CreateMatch(MatchModel match)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+
+                    string insertQuery = @"INSERT INTO [match] 
+                                        (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating) 
+                                        VALUES 
+                                        (@ClubId, @LeagueId, @Team1Id, @Team2Id, @Player1Id, @Player2Id, @StartDate, @EndDate, @CourtId, @Point, @Rating); 
+                                        SELECT SCOPE_IDENTITY();";
+
+                    using (SqlCommand cmd = new SqlCommand(insertQuery, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@ClubId", match.club_id);
+                        cmd.Parameters.AddWithValue("@LeagueId", match.league_id);
+                        cmd.Parameters.AddWithValue("@Team1Id", match.team1_id);
+                        cmd.Parameters.AddWithValue("@Team2Id", match.team2_id);
+                        cmd.Parameters.AddWithValue("@Player1Id", match.player1_id);
+                        cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
+                        cmd.Parameters.AddWithValue("@StartDate", match.start_date);
+                        cmd.Parameters.AddWithValue("@EndDate", match.end_date);
+                        cmd.Parameters.AddWithValue("@CourtId", match.court_id);
+                        cmd.Parameters.AddWithValue("@Point", match.point);
+                        cmd.Parameters.AddWithValue("@Rating", match.rating);
+
+                        // Execute the command and retrieve the newly inserted match ID
+                        int matchId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+
+                        // Set the match_id property of the match object
+                        match.match_id = matchId;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Optionally, you might want to throw the exception to propagate it further
+                throw;
+            }
+
+            return match;
+
+        }
+
+        public async Task<int> GetTeamPlayerId(int team_id)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+
+                    string selectQuery = "SELECT team_member_user_id FROM team_member WHERE team_id = @TeamId";
+
+                    using (SqlCommand cmd = new SqlCommand(selectQuery, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@TeamId", team_id);
+
+
+                        object result = await cmd.ExecuteScalarAsync();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+
+                            return Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return -1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Optionally, you might want to throw the exception to propagate it further
+                throw;
+            }
+        }
+
+
+        }
 }

@@ -1,5 +1,6 @@
 ﻿using NetClubApi.Model;
 using NetClubApi.Model.ResponseModel;
+using System.Text.RegularExpressions;
 
 namespace NetClubApi.Modules.LeagueModule
 {
@@ -12,6 +13,10 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<List<MyLeagues>> GetMyLeagues(int user_id);
         public Task<string> InvitePlayer(string email,String url);
+        public Task<List<MatchModel>> ScheduleMatch(int clubId, int leagueId);
+        public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams,int clubId,int leagueId);
+        public Task<int> getTeamPlayerId(TeamModel playerOne);
+
     }
 
 
@@ -118,5 +123,52 @@ namespace NetClubApi.Modules.LeagueModule
                 return await emailSender.SendEmailAsync(email,url);
            
         }
+
+        public async Task<List<MatchModel>> ScheduleMatch(int clubId, int leagueId)
+        {
+            //retrive all the teams in the league
+            List<TeamModel> listOfTeams = await  GetLeagueTeams(leagueId);
+            return await SchedulingLogic(listOfTeams,clubId,leagueId);
+            
+
+        }
+
+        public async  Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams,int clubId,int leagueId)
+        {
+            List<MatchModel> listOfMatch = new();
+            for (int i = 0; i < listOfTeams.Count - 1; i++)
+            {
+                for (int j = i + 1; j < listOfTeams.Count; j++)
+                {
+                    TeamModel playerOne = listOfTeams[i];
+                    TeamModel playerTwo = listOfTeams[j];
+                    MatchModel match = new MatchModel();
+                    match.club_id = clubId;
+                    match.league_id = leagueId;
+                    match.team1_id = playerOne.team_id;
+                    match.team2_id = playerTwo.team_id;
+                    match.player1_id = await getTeamPlayerId(playerOne);
+                    match.player2_id = await getTeamPlayerId(playerTwo);
+                    match.start_date = "yet not decided";
+                    match.end_date = "yet not decided";
+                    match.court_id = 0;
+                    match.point = 0;
+                    match.rating = 0;
+                    match = await _dataAccess.CreateMatch(match);
+                    listOfMatch.Add(match);
+                        
+
+                }
+            }
+            return listOfMatch;
+
+        }
+
+        public async Task<int> getTeamPlayerId(TeamModel player)
+        {
+            return await  _dataAccess.GetTeamPlayerId(player.team_id);
+        }
+
+        
     }
 }

@@ -10,6 +10,7 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<IClubResponse>> getMyClubs(int user_id);
         public Task<List<IClubResponse>> RegisteredClubs(int user_id);
         public Task<List<IClubResponse>> getClubDetails(List<ClubRegistration> clubs);
+        public Task<List<ClubMember>> getClubMembers(string club_label);
     }
     public class ClubBussinessLogic : IClubBussinessLogics
     {
@@ -119,7 +120,11 @@ namespace NetClubApi.Modules.ClubModule
             {
                 throw;
             }
-
+        }
+        public async Task<List<ClubMember>> getClubMembers(string club_label)
+        {
+            int club_id = await _clubDataAccess.getClubId(club_label);
+            return await _clubDataAccess.getClubMember(club_id);
 
         }
     }

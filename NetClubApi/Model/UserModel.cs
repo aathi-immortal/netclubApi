@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Org.BouncyCastle.Security;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NetClubApi.Model
@@ -28,5 +29,11 @@ namespace NetClubApi.Model
         public string Token { get; set; }
 
         
+    }
+
+    public class UserLogin
+    {
+        public string email { get; set; }
+        public string password { get; set; }
     }
 }

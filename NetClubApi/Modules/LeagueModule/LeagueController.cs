@@ -69,5 +69,13 @@ namespace NetClubApi.Modules.LeagueModule
             return await  _leagueBussinessLayer.InvitePlayer(email,url);
         }
 
+
+        [HttpGet]
+        // schedule action
+        public async Task<List<MatchModel>> ScheduleMatch(int clubId,int leagueId)
+        {
+            return await _leagueBussinessLayer.ScheduleMatch(clubId, leagueId);
+        }
+
     }
 }
