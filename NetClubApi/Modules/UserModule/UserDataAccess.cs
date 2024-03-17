@@ -10,7 +10,7 @@ namespace NetClubApi.Modules.UserModule
 {
     public interface IUserDataAccess
     {
-        public Task<UserModel> AuthenticateUser(UserModel user);
+        public Task<UserModel> AuthenticateUser(UserLogin user_login);
         public Task<UserModel> RegisterUser(UserModel user);
     }
     public class UserDataAccess : IUserDataAccess
@@ -23,20 +23,23 @@ namespace NetClubApi.Modules.UserModule
             _helper = helper;
             _netClubDbContext = netClubDbContext;
         }
-        public async Task<UserModel> AuthenticateUser(UserModel user)
+        public async Task<UserModel> AuthenticateUser(UserLogin user_login)
         {
+                UserModel user = new UserModel();
+            user.Message = [];
             try
             {
+                user.Email = user_login.email;
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                    string sql1 = $@"select * from [dbo].[User_detail] where Email='{user.Email}'";
+                    string sql1 = $@"select * from [dbo].[User_detail] where Email='{user_login.email}'";
                     using (SqlCommand myCommand = new SqlCommand(sql1, myCon))
                     {
                         SqlDataReader reader = myCommand.ExecuteReader();
                         if (reader.HasRows)
                         {
-                            user.Password = _helper.EncodeBase64(user.Password.ToString());
+                            user.Password = _helper.EncodeBase64(user_login.password.ToString());
                             while (reader.Read())
                             {
                                 if (((string)reader["Password"]).CompareTo(user.Password) == 0)
@@ -95,13 +98,30 @@ namespace NetClubApi.Modules.UserModule
                         else
                         {
                             reader.Close();
+                            Console.WriteLine(user.date_of_birth);
                             user.Password = _helper.EncodeBase64(user.Password);
                             string sql2 = $@"INSERT INTO [dbo].[User_detail] (user_name, first_name, last_name, password, email,phone_number,gender,date_of_birth)
                                    VALUES ('{user.User_name}','{user.First_name}','{user.Last_name}',    '{user.Password}','{user.Email}','{user.Phone_number}','{user.gender}','{user.date_of_birth}')";
-                            using (SqlCommand myCommand1 = new SqlCommand(sql2, myCon))
+
+                            string insertSql = @"INSERT INTO [dbo].[User_detail] (user_name, first_name, last_name, password, email,phone_number,gender,date_of_birth)
+                                   VALUES (@user_name,@first_name,@last_name,    @password,@email,@phone_number,@gender,@date_of_birth)";
+                            using (SqlCommand insertCommand = new SqlCommand(insertSql, myCon))
                             {
-                                myCommand1.ExecuteNonQuery();
+                                // Add parameters
+                                insertCommand.Parameters.AddWithValue("@user_name", user.User_name);
+                                insertCommand.Parameters.AddWithValue("@first_name", user.First_name);
+                                insertCommand.Parameters.AddWithValue("@last_name", user.Last_name);
+                                insertCommand.Parameters.AddWithValue("@password", user.Password);
+                                insertCommand.Parameters.AddWithValue("@email", user.Email); 
+                                insertCommand.Parameters.AddWithValue("@phone_number", user.Phone_number);
+                                insertCommand.Parameters.AddWithValue("@gender", user.gender);
+                                insertCommand.Parameters.AddWithValue("@date_of_birth", user.date_of_birth);
+                                insertCommand.ExecuteNonQuery();
                             }
+                           //     using (SqlCommand myCommand1 = new SqlCommand(sql2, myCon))
+                            //{
+                              //  myCommand1.ExecuteNonQuery();
+                            //}
                             user.Message.Add("registered Successfully");
                             user.IsSuccess = true;
                         }

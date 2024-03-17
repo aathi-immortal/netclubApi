@@ -15,9 +15,11 @@ namespace NetClubApi.Modules.ClubModule
 
         public Task<string> CreateClub(Club club, int id);
         public Task<List<ClubRegistration>> getRegisteredClub(int id);
-        public Task<string> ClubRegistration(Club code, int user_id);
+        public Task<string> ClubRegistration(string club_label, int user_id);
         public Task<List<RegisterClubModel>> getRegisteredClubModel(int user_id);
         public Task<string> getClubLabel(int club_id);
+        public Task<int> getClubId(string club_label);
+        public Task<List<ClubMember>> getClubMember(int club_id);
     }
 
     public class ClubDataAccess : IClubDataAccess
@@ -172,8 +174,7 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
 
 
         }
-
-        public async Task<string> ClubRegistration(Club code, int user_id)
+        public async Task<string> ClubRegistration(string code, int user_id)
         {
             try
             {
@@ -181,38 +182,57 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                    string sql2 = $@"select [dbo].[club].Id from [dbo].[club] where [dbo].[club].club_label={code}";
-                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    //string sql2 = $@"select [dbo].[club].id from [dbo].[club] where [dbo].[club].club_label='{code}'";
+                    //using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    //{
+                    /* using (SqlDataReader reader = myCommand.ExecuteReader())
+                     {
+                         if (reader.HasRows)
+                         {
+                             while (reader.Read())
+                             {
+                                 club_id1 = (int)reader["id"];
+                                 Console.WriteLine(club_id1);
+                             }
+                         }
+                         else
+                         {
+                             return "club not found";
+                         }
+                         reader.Close();
+                     }*/
+                    club_id1 = await getClubId(code);
+                    if (club_id1 == -1)
                     {
-                        SqlDataReader reader = myCommand.ExecuteReader();
-                        if (reader.HasRows)
+                        return "club not found";
+                    }
+                        string sql3 = $@"select [dbo].[club_registration].club_id,[dbo].[club_registration].user_id from [dbo].[club_registration] where [dbo].[club_registration].club_id={club_id1} and [dbo].[club_registration].user_id={user_id}";
+                        using (SqlCommand myCommand1 = new SqlCommand(sql3, myCon))
                         {
-                            while (reader.Read())
+                            SqlDataReader reader1 = myCommand1.ExecuteReader();
+                            if (reader1.HasRows)
                             {
-                                club_id1 = (int)reader["Id"];
-                                string sql3 = $@"select [dbo].[club_registration].club_id,[dbo].[club_registration].user_id from [dbo].[club_registration] where [dbo].[club_registration].club_id={club_id1} and [dbo].[club_registration].user_id={user_id}";
-                                using (SqlCommand myCommand1 =new SqlCommand(sql3, myCon))
+                                return "already register in this club";
+                            }
+                            else
+                            {
+                                reader1.Close();
+                                string insertSql = @"insert into [dbo].[club_registration](user_id,club_id,isadmin,join_date) values (@user_id, @club_id, @isadmin, @join_date)";
+                                using (SqlCommand insertCommand = new SqlCommand(insertSql, myCon))
                                 {
-                                    SqlDataReader reader1 = myCommand1.ExecuteReader();
-                                    if (reader1.HasRows)
-                                    {
-                                        return "already register in this club";
-                                    }
-                                    else
-                                    {
-                                        string insertSql = $@"insert into [dbo].[club_registration](user_id,club_id,isadmin,join_date)  values ('{user_id}','{club_id1}','{0}','{DateTime.Now}')";
-                                        return "Club registered";
-                                    }
+                                    // Add parameters
+                                    insertCommand.Parameters.AddWithValue("@user_id", user_id);
+                                    insertCommand.Parameters.AddWithValue("@club_id", club_id1);
+                                    insertCommand.Parameters.AddWithValue("@isadmin", 0); // Assuming 0 is not admin
+                                    insertCommand.Parameters.AddWithValue("@join_date", DateTime.Now);
+
+                                    // Execute the insert command
+                                    insertCommand.ExecuteNonQuery();
                                 }
+                                return "Club registered";
                             }
                         }
-                        else
-                        {
-                            return "club not found";
-                            reader.Close();
-                        }
-                        myCon.Close();
-                    }
+                    //}
                 }
             }
             catch (Exception ex)
@@ -220,31 +240,10 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                 Console.WriteLine(ex.Message);
                 return ex.Message;
             }
-            /*
-            var club = await _netClubDbContext.club.FirstOrDefaultAsync(club => club.club_label == code.club_label);
-
-            if (club == default)
-                return "club not found";
-            var club_id = club.Id;
-            if (await IsAlreadyRegister(club_id, user_id))
-                return "already register in this club";
-            else
-            {
-                ClubRegistration clubRegistration = new();
-                clubRegistration.user_id = user_id;
-                clubRegistration.club_id = club_id;
-
-                clubRegistration.isadmin = false;
-                //clubRegistration.league_played = 0;
-
-                clubRegistration.join_date = DateTime.Now;
-                await _netClubDbContext.club_registration.AddAsync(clubRegistration);
-                await _netClubDbContext.SaveChangesAsync();
-                return "you registered to the club";
-            }*/
             return "Club registered";
         }
 
+        
         private async Task<bool> IsAlreadyRegister(int club_id, int user_id)
         {
             var club = await _netClubDbContext.club_registration.FirstOrDefaultAsync(club => club.Id == club_id && club.user_id == user_id);
@@ -288,5 +287,132 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
             var club = await _netClubDbContext.club.FirstOrDefaultAsync(club => club.Id== club_id);
            return club.club_label;
         }
+        public async Task<int> getClubId(string club_label)
+        {
+            int club_id = -1;
+            using (SqlConnection myCon = sqlHelper.GetConnection())
+            {
+                myCon.Open();
+                string sqlquery= $@"select [dbo].[club].id from [dbo].[club] where [dbo].[club].club_label='{club_label}'";
+                using (SqlCommand myCommand = new SqlCommand(sqlquery, myCon))
+                {
+                    using (SqlDataReader reader = myCommand.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                club_id = (int)reader["id"];
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                            return -1;
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            return club_id;
+        }
+
+        public async Task<List<ClubMember>> getClubMember(int club_id)
+        {
+            List<ClubMember> club_members =new List<ClubMember>();
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select [dbo].[user_detail].Id,[dbo].[user_detail].first_name,[dbo].[user_detail].last_name,[dbo].[user_detail].Email,[dbo].[user_detail].phone_number,[dbo].[user_detail].gender,[dbo].[club_registration].join_date from [dbo].[user_detail] inner join [dbo].[club_registration] on [dbo].[club_registration].user_id=[dbo].[user_detail].Id where [dbo].[club_registration].club_id={club_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                ClubMember club_mem= new ClubMember
+                                {
+                                     user_id= (int)reader["Id"],
+                                    email = (string)reader["email"],
+                                    first_name = (string)reader["first_name"],
+                                    last_name = (string)reader["last_name"],
+                                    phone_number = (string)reader["phone_number"],
+                                    gender = (string)reader["gender"],
+                                    join_date = (DateTime)reader["join_date"],
+                                };
+                                club_members.Add(club_mem);
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                            return [];
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return [];
+            }
+            return club_members;
+        }
+
     }
 }
+
+/*  public async Task<string> ClubRegistration(string code, int user_id)
+          {
+              try
+              {
+                  int club_id1 = 0;
+                  using (SqlConnection myCon = sqlHelper.GetConnection())
+                  {
+                      myCon.Open();
+                      string sql2 = $@"select [dbo].[club].id from [dbo].[club] where [dbo].[club].club_label='{code}'";
+                      using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                      {
+                          SqlDataReader reader = myCommand.ExecuteReader();
+                          if (reader.HasRows)
+                          {
+                              while (reader.Read())
+                              {
+                                  club_id1 = (int)reader["id"];
+                                  string sql3 = $@"select [dbo].[club_registration].club_id,[dbo].[club_registration].user_id from [dbo].[club_registration] where [dbo].[club_registration].club_id={club_id1} and [dbo].[club_registration].user_id={user_id}";
+                                  using (SqlCommand myCommand1 =new SqlCommand(sql3, myCon))
+                                  {
+                                      SqlDataReader reader1 = myCommand1.ExecuteReader();
+                                      if (reader1.HasRows)
+                                      {
+                                          return "already register in this club";
+                                      }
+                                      else
+                                      {
+                                          string insertSql = $@"insert into [dbo].[club_registration](user_id,club_id,isadmin,join_date)  values ('{user_id}','{club_id1}','{0}','{DateTime.Now}')";
+                                          return "Club registered";
+                                      }
+                                  }
+                              }
+                          }
+                          else
+                          {
+                              return "club not found";
+                              reader.Close();
+                          }
+                          myCon.Close();
+                      }
+                  }
+              }
+              catch (Exception ex)
+              {
+                  Console.WriteLine(ex.Message);
+                  return ex.Message;
+              }
+              return "Club registered";
+          }*/

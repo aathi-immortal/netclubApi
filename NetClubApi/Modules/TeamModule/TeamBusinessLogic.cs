@@ -87,7 +87,7 @@ namespace NetClubApi.Modules.TeamModule
                 {
                     club_label = club_label
                 };
-                string clubreg = await _clubDataAccess.ClubRegistration(club, team_doubles.player2);
+                string clubreg = await _clubDataAccess.ClubRegistration(club.club_label, team_doubles.player2);
 
                 if (my_team_id != -1 && my_team_id != -2 && clubreg != null)
                 {

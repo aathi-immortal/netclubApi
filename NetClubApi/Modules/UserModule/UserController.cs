@@ -27,9 +27,9 @@ namespace NetClubApi.Modules.UserModule
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<UserModel> Authentication(UserModel user)
+        public async Task<UserModel> Authentication(UserLogin user_login)
         {
-            user = await _dataAccess.AuthenticateUser(user);
+            UserModel user = await _dataAccess.AuthenticateUser(user_login);
 
             if (user.IsSuccess)
                 user.Token = _helper.generateToken(user);
