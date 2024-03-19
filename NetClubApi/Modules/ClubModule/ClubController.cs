@@ -129,6 +129,18 @@ namespace NetClubApi.Modules.ClubModule
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); return []; }
         }
+        [HttpPost]
+        public async Task<String> ClubInvitation(String url,string email)
+        {
+                try
+            {
+                return await _clubBussinessLogics.ClubInvitation(url,email);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
 
 
     }

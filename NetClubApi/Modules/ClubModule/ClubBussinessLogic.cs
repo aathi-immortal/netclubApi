@@ -11,14 +11,17 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<IClubResponse>> RegisteredClubs(int user_id);
         public Task<List<IClubResponse>> getClubDetails(List<ClubRegistration> clubs);
         public Task<List<ClubMember>> getClubMembers(string club_label);
+     public  Task<string> ClubInvitation(string url, string email);
     }
     public class ClubBussinessLogic : IClubBussinessLogics
     {
         private readonly IClubDataAccess _clubDataAccess;
+        private readonly IEmailSender _emailSender;
 
-        public ClubBussinessLogic(IClubDataAccess clubDataAccess)
+        public ClubBussinessLogic(IClubDataAccess clubDataAccess,IEmailSender emailSender)
         {
             _clubDataAccess = clubDataAccess;
+            _emailSender = emailSender;
         }
 
         public async Task<List<IClubResponse>> getMyClubs(int user_id)
@@ -126,6 +129,11 @@ namespace NetClubApi.Modules.ClubModule
             int club_id = await _clubDataAccess.getClubId(club_label);
             return await _clubDataAccess.getClubMember(club_id);
 
+        }
+
+        public Task<string> ClubInvitation(string url, string email)
+        {
+            return _emailSender.ClubInvitation(email, url);
         }
     }
 }
