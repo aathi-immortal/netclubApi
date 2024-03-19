@@ -13,6 +13,7 @@ namespace NetClubApi.Modules.CourtModule
         Task ApproveCourt(int courtId);
 
         Task<CourtModel> GetCourtByZip(int zip);
+        Task<List<CourtModel>> SearchCourtsByName(string searchQuery);
     }
 
     public class CourtDataAccess : ICourtDataAccess
@@ -55,6 +56,12 @@ namespace NetClubApi.Modules.CourtModule
             return await _netClubDbContext.court.Where(c => c.approved).ToListAsync();
         }
 
+        public async Task<List<CourtModel>> SearchCourtsByName(string searchQuery)
+        {
+            return await _netClubDbContext.court
+                .Where(c => c.approved && c.court_name.StartsWith(searchQuery))
+                .ToListAsync();
+        }
 
     }
 }
