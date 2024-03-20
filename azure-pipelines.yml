@@ -46,7 +46,7 @@ steps:
 - script: |
     git config --global user.email "logsak25@gmail.com"
     git config --global user.name "Abishekdeepak5"
-    git clone https://github.com/Abishekdeepak5/ClubProject.git temp-repo
+    git clone https://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@github.com/Abishekdeepak5/ClubProject.git temp-repo
     cp -r ./* temp-repo/
     cd temp-repo
     git add .
