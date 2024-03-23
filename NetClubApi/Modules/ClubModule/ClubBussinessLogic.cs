@@ -72,9 +72,9 @@ namespace NetClubApi.Modules.ClubModule
                             // myclub.TotalLeagues = clubdetails.total_league;
                             //myclub.ActiveLeagues = clubdetails.active_league;
                             //myclub.Teams = clubdetails.teams;
-                            myclub.TotalLeagues = 0;
+                            myclub.TotalLeagues = await getNumberOfLeagues(club.club_id);
                             myclub.ActiveLeagues = 0;
-                            myclub.Teams = 0;
+                            myclub.Teams = await getNumberOfTeams(club.club_id) ;
                             myclub.club_label = clubdetails.club_label;
 
                             listOfClubs.Add(myclub);
@@ -111,6 +111,15 @@ namespace NetClubApi.Modules.ClubModule
 
         }
 
+        public Task<int> getNumberOfTeams(int club_id)
+        {
+            return _clubDataAccess.getNumberOfTeams(club_id);
+        }
+
+        public  Task<int> getNumberOfLeagues(int club_id)
+        {
+            return _clubDataAccess.getNumberOfLeagues(club_id);
+        }
 
         public async Task<List<IClubResponse>> RegisteredClubs(int user_id)
         {
