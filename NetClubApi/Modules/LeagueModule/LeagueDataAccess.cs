@@ -21,7 +21,7 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<Club> GetClub(int club_id);
         public Task<UserModel> GetUserByEmail(String email);
-
+        public Task<bool> AlreadyRegisterd(LeagueRegistration league);
     }
     public class LeagueDataAccess : ILeagueDataAccess
     {
@@ -54,7 +54,24 @@ namespace NetClubApi.Modules.LeagueModule
 
         public async Task<bool> IsAdmin(int? club_id, int user_id)
         {
-            var club = await netClubDbContext.club_registration.FirstOrDefaultAsync(club => club.club_id == club_id && club.user_id == user_id && club.isadmin);
+            //using (SqlConnection mycon = sqlHelper.GetConnection())
+            //{
+            //    mycon.Open();
+            //    string query = "SELECT TOP 1 1 FROM THE CLUB_REGISTRATION WHERE CLUB_ID = @CLUB_ID AND USER_ID = @USER_ID AND ISADMIN = 1";
+            //    using(SqlCommand cmd = new SqlCommand(query,mycon))
+            //    {
+            //        cmd.Parameters.AddWithValue("@CLUB_ID", club_id);
+            //        cmd.Parameters.AddWithValue("@USER_ID", user_id);
+            //        Object result = cmd.ExecuteScalar();
+            //        if (result != null )
+            //        {
+            //            return true;
+            //        }
+            //        return false;
+            //    }
+            //}
+
+                var club = await netClubDbContext.club_registration.FirstOrDefaultAsync(club => club.club_id == club_id && club.user_id == user_id && club.isadmin);
             if (club == default)
                 return false;
             return true;
@@ -154,7 +171,15 @@ namespace NetClubApi.Modules.LeagueModule
 
         }
 
+        public async Task<bool> AlreadyRegisterd(LeagueRegistration league)
+        {
 
+            LeagueRegistration registeredLeague =  await netClubDbContext.league_registration.FirstOrDefaultAsync(leagues => leagues.user_id == league.user_id);
+            if (registeredLeague == default)
+                return false;
+            return true;
+
+        }
     }
 }
 

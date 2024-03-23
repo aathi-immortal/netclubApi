@@ -83,6 +83,7 @@ namespace NetClubApi.Modules.ClubModule
         {
             var userClaims = User.FindFirst("id");
             int user_id = int.Parse(userClaims.Value);
+            Console.WriteLine(user_id);
             return await _clubDataAccess.getRegisteredClubModel(user_id);
               /*  List<RegisterClub> listOfRegisterClubs = new();
             try
