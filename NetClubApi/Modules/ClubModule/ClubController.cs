@@ -130,6 +130,11 @@ namespace NetClubApi.Modules.ClubModule
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); return []; }
         }
+        [HttpGet]
+        public async Task<Club> getClubById(int club_id)
+        {
+            return await _clubDataAccess.getClubById(club_id);
+        }
         [HttpPost]
         public async Task<String> ClubInvitation(String url,string email)
         {

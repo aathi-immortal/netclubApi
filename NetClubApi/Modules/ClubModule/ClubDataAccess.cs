@@ -23,6 +23,8 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<ClubMember>> getClubMember(int club_id);
         Task<int> getNumberOfTeams(int club_id);
         Task<int> getNumberOfLeagues(int club_id);
+
+        Task<Club> getClubById(int club_id);
     }
 
     public class ClubDataAccess : IClubDataAccess
@@ -393,6 +395,53 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                     return (int)cmd.ExecuteScalar();
                 }
             }
+        }
+
+        public async Task<Club> getClubById(int club_id)
+        {
+            Club club= new Club();
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"select * from [dbo].[club] where [dbo].[club].id={club_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                club.Id = (int)reader["id"];
+                                club.club_name = (string)reader["club_name"];
+                                club.address1 = (string)reader["address1"];
+                                club.address2 = (string)reader["address2"];
+                                club.state = (string)reader["state"];
+                                club.city = (string)reader["city"];
+                                club.zip = (string)reader["zip"];
+                                club.created_by = (string)reader["created_by"];
+                                club.club_label = (string)reader["club_label"];
+                                club. created_date= (DateTime)reader["created_date"];
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                            return club;
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return club;
+            }
+            return club;
+
         }
     }
 }
