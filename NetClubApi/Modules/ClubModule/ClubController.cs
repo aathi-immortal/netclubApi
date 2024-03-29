@@ -143,18 +143,7 @@ namespace NetClubApi.Modules.ClubModule
             }
         }
 
-        [HttpGet]
-        public async Task<String> ClubInvitation(String url,String email)
-        {
-            try
-            {
-                return await _clubBussinessLogics.ClubInvitation(url, email);
-            }
-            catch(Exception)
-            {
-                throw;
-            }
-        }
+        
 
 
     }

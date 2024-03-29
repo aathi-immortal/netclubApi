@@ -15,7 +15,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
         public Task<int> getTeamPlayerId(TeamModel playerOne);
         public  Task<bool> isAlreadyScheduled(int leagueId);
-        public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches);
+        public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches, List<TeamModel> teams);
     }
     public class MatchBusinessLogic : IMatchBusinessLogic
     {
@@ -55,9 +55,9 @@ namespace NetClubApi.Modules.MatchModule
 
                     //mathc scheduling
                     List<MatchModel> matches = await SchedulingLogic(listOfTeams, clubId, leagueId);
-
+                    Console.WriteLine("size fo matches   " + matches.Count);
                     //court scheduling
-                    await CourtScheduling(matches);
+                    await CourtScheduling(matches,listOfTeams);
 
                     return "Match Scheduled Successfully";
                 }
@@ -131,12 +131,13 @@ namespace NetClubApi.Modules.MatchModule
 pair.Key,pair.Value);
                         
 
-                        await _matchDataAccess.createMatch(match);
+                        
 
 
-                        string suc=await _matchDataAccess.createMatch(match);
-                        Console.WriteLine(suc);
-
+                        
+                        match.club_id = clubId;
+                        match.league_id = leagueId;
+                        
                         listOfMatch.Add(match);
                        // Console.WriteLine(match.league_id);
                     }
@@ -158,8 +159,7 @@ pair.Key,pair.Value);
             
             match.team1_id = playerOne.team_id;
             match.team2_id = playerTwo.team_id;
-            match.club_id = 38;
-            match.league_id = 1;
+            
             match.player1_id = await getTeamPlayerId(playerOne);
             match.player2_id = await getTeamPlayerId(playerTwo);
             match.start_date = DateTime.Now;
@@ -174,14 +174,52 @@ pair.Key,pair.Value);
             return await _matchDataAccess.GetTeamPlayerId(player.team_id);
         }
 
-        public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches)
+        public async Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches,List<TeamModel> teams)
         {
             //            requirement
             //       court id of the each team in the list of matches
 
             //hashmap to store the court details
-            Dictionary<int, int> courts = new();
 
+            
+            int homeCourtLimit = matches.Count/teams.Count;
+            Console.WriteLine("court " + homeCourtLimit);
+            Dictionary<int, int> courts = new();
+            
+            foreach(TeamModel team in teams)
+            {
+                courts.Add(team.team_id, 0);
+            }
+            // traverse the MatchModel
+            foreach(MatchModel match in matches)
+            {
+                //if team 1 is not more than limit
+                int teamACourt = courts[match.team1_id];
+                int teamBCourt = courts[match.team2_id];
+
+                int selectedCourt = match.team1_id;
+                if(teamACourt < homeCourtLimit)
+                {
+                    selectedCourt = match.team1_id;
+                    courts[match.team1_id] = teamACourt + 1;
+                }
+                else if(teamBCourt < homeCourtLimit)
+                {
+                    selectedCourt = match.team2_id;
+                    courts[match.team2_id] = teamBCourt + 1;
+                }
+                else
+                    courts[match.team1_id] = teamACourt + 1;
+
+                
+                match.court_id = selectedCourt;
+                
+                await _matchDataAccess.createMatch(match);
+
+
+            }
+            return matches;
+                
 
 
 

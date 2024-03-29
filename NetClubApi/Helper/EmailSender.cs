@@ -6,41 +6,35 @@ using NetClubApi.Helper;
 
 public interface IEmailSender
 {
-<<<<<<< HEAD
-    public Task<string> SendEmailAsync(string email, String url, string subject);
-    public Task<String> ClubInvitation(string email,string url );
-    public Task<String> LeagueInvitation(string email,string url );
-=======
-    public Task<string> SendEmailAsync(string email, String url,string subject,string httmlTemplate);
+
+
+    public Task<string> SendEmailAsync(string email, String url,string subject,string htmlTemplate);
     public Task<String> ClubInvitation(string email, String url);
     public Task<String> LeagueInvitation(string email, String url);
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
 }
 
 public class EmailSender : IEmailSender
 {
     public async Task<string> ClubInvitation(string email, string url)
     {
-<<<<<<< HEAD
-        return await SendEmailAsync(email, url, "clubInvitation");
-=======
+
+        
+
         return await SendEmailAsync(email, url,"clubInvitation", ClubInvitationEmail.ProfessionalEmailTemplate);
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
     }
 
     public async Task<string> LeagueInvitation(string email, string url)
     {
-<<<<<<< HEAD
-        return await SendEmailAsync(email, url,"leagueInvitation");
+
+        return await SendEmailAsync(email, url,"leagueInvitation",LeagueInvitationEmail.ProfessionalEmailTemplate);
     }
 
-    public async Task<string> SendEmailAsync(string email, String url,string subject)
-=======
-        return await SendEmailAsync(email, url, "leagueInvitation", LeagueInvitationEmail.ProfessionalEmailTemplate);
-    }
+    
 
     public async Task<string> SendEmailAsync(string email, String url,string subject,string htmlTemplate)
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
     {
         
 

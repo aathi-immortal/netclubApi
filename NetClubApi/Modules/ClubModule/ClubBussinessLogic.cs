@@ -11,22 +11,22 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<IClubResponse>> RegisteredClubs(int user_id);
         public Task<List<IClubResponse>> getClubDetails(List<ClubRegistration> clubs);
         public Task<List<ClubMember>> getClubMembers(string club_label);
-<<<<<<< HEAD
+
         public Task<string> ClubInvitation(string url, string email);
-=======
-     public  Task<string> ClubInvitation(string url, string email);
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
+
+
     }
     public class ClubBussinessLogic : IClubBussinessLogics
     {
         private readonly IClubDataAccess _clubDataAccess;
         private readonly IEmailSender _emailSender;
-<<<<<<< HEAD
-        public ClubBussinessLogic(IClubDataAccess clubDataAccess, IEmailSender emailSender)
-=======
+
+        
+
 
         public ClubBussinessLogic(IClubDataAccess clubDataAccess,IEmailSender emailSender)
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
         {
             _clubDataAccess = clubDataAccess;
             _emailSender = emailSender;
@@ -148,15 +148,12 @@ namespace NetClubApi.Modules.ClubModule
 
         }
 
-<<<<<<< HEAD
-        public async Task<string> ClubInvitation(string url, string email)
-        {
-            return await _emailSender.ClubInvitation(email, url);
-=======
+
+        
         public Task<string> ClubInvitation(string url, string email)
         {
             return _emailSender.ClubInvitation(email, url);
->>>>>>> 8ff77041da275b91087241d51571b3ec7a5ab60a
+
         }
     }
 }
