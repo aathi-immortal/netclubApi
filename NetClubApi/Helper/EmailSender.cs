@@ -5,16 +5,24 @@ using MimeKit;
 
 public interface IEmailSender
 {
-    public Task<string> SendEmailAsync(string email, String url);
-
+    public Task<string> SendEmailAsync(string email, String url, string subject);
+    public Task<String> ClubInvitation(string email,string url );
+    public Task<String> LeagueInvitation(string email,string url );
 }
 
 public class EmailSender : IEmailSender
 {
+    public async Task<string> ClubInvitation(string email, string url)
+    {
+        return await SendEmailAsync(email, url, "clubInvitation");
+    }
 
-    
-    
-    public async Task<string> SendEmailAsync(string email, String url)
+    public async Task<string> LeagueInvitation(string email, string url)
+    {
+        return await SendEmailAsync(email, url,"leagueInvitation");
+    }
+
+    public async Task<string> SendEmailAsync(string email, String url,string subject)
     {
         
 
@@ -69,7 +77,7 @@ public class EmailSender : IEmailSender
             MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress("Your Company", senderEmail));
             message.To.Add(MailboxAddress.Parse(email));
-            message.Subject = "vanakkam";
+            message.Subject = subject;
 
 
             var multipart = new Multipart("mixed");

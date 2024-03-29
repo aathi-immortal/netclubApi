@@ -15,6 +15,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
         public Task<int> getTeamPlayerId(TeamModel playerOne);
         public  Task<bool> isAlreadyScheduled(int leagueId);
+        public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches);
     }
     public class MatchBusinessLogic : IMatchBusinessLogic
     {
@@ -51,7 +52,13 @@ namespace NetClubApi.Modules.MatchModule
                 {
                     Console.WriteLine(clubId + " " + leagueId);
                     List<TeamModel> listOfTeams = await _leagueBussinessLayer.GetLeagueTeams(leagueId);
-                    await SchedulingLogic(listOfTeams, clubId, leagueId);
+
+                    //mathc scheduling
+                    List<MatchModel> matches = await SchedulingLogic(listOfTeams, clubId, leagueId);
+
+                    //court scheduling
+                    await CourtScheduling(matches);
+
                     return "Match Scheduled Successfully";
                 }
                 return "Match is Already Scheduled";
@@ -124,6 +131,7 @@ namespace NetClubApi.Modules.MatchModule
 pair.Key,pair.Value);
                         
                         await _matchDataAccess.createMatch(match);
+
                         listOfMatch.Add(match);
                         Console.WriteLine(match.league_id);
                     }
@@ -159,6 +167,20 @@ pair.Key,pair.Value);
         public async Task<int> getTeamPlayerId(TeamModel player)
         {
             return await _matchDataAccess.GetTeamPlayerId(player.team_id);
+        }
+
+        public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches)
+        {
+            //            requirement
+            //       court id of the each team in the list of matches
+
+            //hashmap to store the court details
+            Dictionary<int, int> courts = new();
+
+
+
+
+
         }
     }
 }

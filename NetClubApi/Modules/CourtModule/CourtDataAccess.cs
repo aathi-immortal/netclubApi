@@ -1,4 +1,4 @@
-﻿using NetClubApi.Model;
+using NetClubApi.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;

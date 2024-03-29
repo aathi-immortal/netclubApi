@@ -118,7 +118,7 @@ namespace NetClubApi.Modules.LeagueModule
             
             
 
-                return await emailSender.SendEmailAsync(email,url);
+                return await emailSender.LeagueInvitation(email,url);
            
         }
 
