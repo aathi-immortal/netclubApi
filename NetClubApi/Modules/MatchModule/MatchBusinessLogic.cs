@@ -130,10 +130,15 @@ namespace NetClubApi.Modules.MatchModule
                        MatchModel match = await  MatchModelWrapper(
 pair.Key,pair.Value);
                         
+
                         await _matchDataAccess.createMatch(match);
 
+
+                        string suc=await _matchDataAccess.createMatch(match);
+                        Console.WriteLine(suc);
+
                         listOfMatch.Add(match);
-                        Console.WriteLine(match.league_id);
+                       // Console.WriteLine(match.league_id);
                     }
 
                 }

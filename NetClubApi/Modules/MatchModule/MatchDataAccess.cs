@@ -22,11 +22,30 @@ namespace NetClubApi.Modules.MatchModule
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                    string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
-                                   VALUES ({match.club_id},{1},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
-                    using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
+                   
+                   // string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
+                    //               VALUES ({match.club_id},{match.league_id},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
+                    string sql3= @"INSERT INTO[match]
+                                        (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating)
+                                        VALUES
+                                        (@ClubId, @LeagueId, @Team1Id, @Team2Id, @Player1Id, @Player2Id, @StartDate, @EndDate, @CourtId, @Point, @Rating)";
+                    using (SqlCommand cmd = new SqlCommand(sql3, myCon))
                     {
-                        myCommand1.ExecuteNonQuery();
+                        cmd.Parameters.AddWithValue("@ClubId", 38);
+                        cmd.Parameters.AddWithValue("@LeagueId",match.league_id);
+                        cmd.Parameters.AddWithValue("@Team1Id", match.team1_id);
+                        cmd.Parameters.AddWithValue("@Team2Id", match.team2_id);
+                        cmd.Parameters.AddWithValue("@Player1Id", match.player1_id);
+                        cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
+                        cmd.Parameters.AddWithValue("@StartDate", match.start_date);
+                        cmd.Parameters.AddWithValue("@EndDate", match.end_date);
+                        cmd.Parameters.AddWithValue("@CourtId", 1);
+                        cmd.Parameters.AddWithValue("@Point", match.point);
+                        cmd.Parameters.AddWithValue("@Rating", match.rating);
+
+                        Console.WriteLine(match.club_id);
+                    Console.WriteLine(match.league_id);
+                        cmd.ExecuteNonQuery();
                     }
                     myCon.Close();
                 }

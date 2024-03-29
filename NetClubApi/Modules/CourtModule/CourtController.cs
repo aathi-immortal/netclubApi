@@ -39,5 +39,11 @@ namespace NetClubApi.Modules.CourtModule
             await _courtBussinessLayer.ApproveCourt(courtId);
             return Ok("Court approved");
         }
+
+        [HttpGet("search")]
+        public async Task<List<CourtModel>> SearchCourtsByName(string searchQuery)
+        {
+            return await _courtBussinessLayer.SearchCourtsByName(searchQuery);
+        }
     }
 }

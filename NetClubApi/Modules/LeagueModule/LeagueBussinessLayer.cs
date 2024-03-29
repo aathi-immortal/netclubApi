@@ -13,7 +13,9 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<List<MyLeagues>> GetMyLeagues(int user_id);
         public Task<string> InvitePlayer(string email,String url);
-      
+        public Task<bool> AlreadyRegistered(LeagueRegistration league);
+
+
 
     }
 
@@ -65,13 +67,19 @@ namespace NetClubApi.Modules.LeagueModule
         {
             try
             {
-
-                return await _dataAccess.RegisterLeague(league);
+                if(!await AlreadyRegistered(league))
+                    return await _dataAccess.RegisterLeague(league);
+                return "Already registered";
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public  async Task<bool> AlreadyRegistered(LeagueRegistration league)
+        {
+            return await _dataAccess.AlreadyRegisterd(league);
         }
 
         public async Task<List<MyLeagues>> GetMyLeagues(int user_id)
