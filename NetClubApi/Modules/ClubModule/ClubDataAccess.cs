@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NetClubApi.Helper;
 using NetClubApi.Model;
@@ -20,6 +21,8 @@ namespace NetClubApi.Modules.ClubModule
         public Task<string> getClubLabel(int club_id);
         public Task<int> getClubId(string club_label);
         public Task<List<ClubMember>> getClubMember(int club_id);
+        Task<int> getNumberOfTeams(int club_id);
+        Task<int> getNumberOfLeagues(int club_id);
     }
 
     public class ClubDataAccess : IClubDataAccess
@@ -364,55 +367,33 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
             return club_members;
         }
 
+        public async  Task<int> getNumberOfTeams(int club_id)
+        {
+            using (SqlConnection mycon = sqlHelper.GetConnection())
+            {
+                mycon.Open();
+                string query = "Select count(*) from team where club_id = @Id";
+                using(SqlCommand cmd = new SqlCommand(query,mycon))
+                {
+                    cmd.Parameters.AddWithValue("@Id", club_id);
+                    return (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
+        public async Task<int> getNumberOfLeagues(int club_id)
+        {
+            using (SqlConnection mycon = sqlHelper.GetConnection())
+            {
+                mycon.Open();
+                string query = "Select count(*) from league where club_id = @Id";
+                using (SqlCommand cmd = new SqlCommand(query, mycon))
+                {
+                    cmd.Parameters.AddWithValue("@Id", club_id);
+                    return (int)cmd.ExecuteScalar();
+                }
+            }
+        }
     }
 }
 
-/*  public async Task<string> ClubRegistration(string code, int user_id)
-          {
-              try
-              {
-                  int club_id1 = 0;
-                  using (SqlConnection myCon = sqlHelper.GetConnection())
-                  {
-                      myCon.Open();
-                      string sql2 = $@"select [dbo].[club].id from [dbo].[club] where [dbo].[club].club_label='{code}'";
-                      using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
-                      {
-                          SqlDataReader reader = myCommand.ExecuteReader();
-                          if (reader.HasRows)
-                          {
-                              while (reader.Read())
-                              {
-                                  club_id1 = (int)reader["id"];
-                                  string sql3 = $@"select [dbo].[club_registration].club_id,[dbo].[club_registration].user_id from [dbo].[club_registration] where [dbo].[club_registration].club_id={club_id1} and [dbo].[club_registration].user_id={user_id}";
-                                  using (SqlCommand myCommand1 =new SqlCommand(sql3, myCon))
-                                  {
-                                      SqlDataReader reader1 = myCommand1.ExecuteReader();
-                                      if (reader1.HasRows)
-                                      {
-                                          return "already register in this club";
-                                      }
-                                      else
-                                      {
-                                          string insertSql = $@"insert into [dbo].[club_registration](user_id,club_id,isadmin,join_date)  values ('{user_id}','{club_id1}','{0}','{DateTime.Now}')";
-                                          return "Club registered";
-                                      }
-                                  }
-                              }
-                          }
-                          else
-                          {
-                              return "club not found";
-                              reader.Close();
-                          }
-                          myCon.Close();
-                      }
-                  }
-              }
-              catch (Exception ex)
-              {
-                  Console.WriteLine(ex.Message);
-                  return ex.Message;
-              }
-              return "Club registered";
-          }*/

@@ -83,6 +83,7 @@ namespace NetClubApi.Modules.ClubModule
         {
             var userClaims = User.FindFirst("id");
             int user_id = int.Parse(userClaims.Value);
+            Console.WriteLine(user_id);
             return await _clubDataAccess.getRegisteredClubModel(user_id);
               /*  List<RegisterClub> listOfRegisterClubs = new();
             try
@@ -129,6 +130,20 @@ namespace NetClubApi.Modules.ClubModule
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); return []; }
         }
+        [HttpPost]
+        public async Task<String> ClubInvitation(String url,string email)
+        {
+                try
+            {
+                return await _clubBussinessLogics.ClubInvitation(url,email);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        
 
 
     }

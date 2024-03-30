@@ -44,8 +44,14 @@ namespace NetClubApi.Modules.TeamModule
                             Console.WriteLine("Inserted row ID: " + insertedId);
                         }
                     }
+                    string leagueUpdate = $@"update [dbo].[league] set number_of_teams = number_of_teams + 1 where id = @League_id";
+                    using (SqlCommand cmd = new SqlCommand(leagueUpdate, myCon))
+                    {
+                        cmd.Parameters.AddWithValue("@League_id", team.league_id);
+                        cmd.ExecuteNonQuery();
+                    }
 
-                    
+
                     myCon.Close();
                 }
                 return Task.FromResult(insertedId);
@@ -67,6 +73,8 @@ namespace NetClubApi.Modules.TeamModule
                     using (SqlConnection myCon = sqlHelper.GetConnection())
                     {
                         myCon.Open();
+
+                        //inserting new team in the team table
                         for (int i = 0; i < member_count; i++)
                         {
                             string sql1 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id, team_id)
@@ -76,7 +84,21 @@ namespace NetClubApi.Modules.TeamModule
                                 myCommand1.ExecuteNonQuery();
                             }
                         }
+
+                        //updating league table
+                        
                         myCon.Close();
+
+
+
+
+
+
+
+
+
+
+
                     }
                 }
                 return Task.FromResult("Team member added");

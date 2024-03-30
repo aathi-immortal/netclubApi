@@ -66,7 +66,7 @@ namespace NetClubApi.Modules.LeagueModule
         //[Authorize]
         public async Task<String> InvitePlayer(String email,String url)
         {
-            return await  _leagueBussinessLayer.InvitePlayer(email,url);
+            return await _leagueBussinessLayer.InvitePlayer(email, url);
         }
 
 

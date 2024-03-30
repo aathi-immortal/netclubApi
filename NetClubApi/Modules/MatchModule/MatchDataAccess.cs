@@ -42,7 +42,7 @@ namespace NetClubApi.Modules.MatchModule
                         cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
                         cmd.Parameters.AddWithValue("@StartDate", match.start_date);
                         cmd.Parameters.AddWithValue("@EndDate", match.end_date);
-                        cmd.Parameters.AddWithValue("@CourtId", 1);
+                        cmd.Parameters.AddWithValue("@CourtId", match.court_id);
                         cmd.Parameters.AddWithValue("@Point", match.point);
                         cmd.Parameters.AddWithValue("@Rating", match.rating);
 

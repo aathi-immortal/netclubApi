@@ -11,14 +11,25 @@ namespace NetClubApi.Modules.ClubModule
         public Task<List<IClubResponse>> RegisteredClubs(int user_id);
         public Task<List<IClubResponse>> getClubDetails(List<ClubRegistration> clubs);
         public Task<List<ClubMember>> getClubMembers(string club_label);
+
+        public Task<string> ClubInvitation(string url, string email);
+
+
+
     }
     public class ClubBussinessLogic : IClubBussinessLogics
     {
         private readonly IClubDataAccess _clubDataAccess;
+        private readonly IEmailSender _emailSender;
 
-        public ClubBussinessLogic(IClubDataAccess clubDataAccess)
+        
+
+
+        public ClubBussinessLogic(IClubDataAccess clubDataAccess,IEmailSender emailSender)
+
         {
             _clubDataAccess = clubDataAccess;
+            _emailSender = emailSender;
         }
 
         public async Task<List<IClubResponse>> getMyClubs(int user_id)
@@ -69,9 +80,9 @@ namespace NetClubApi.Modules.ClubModule
                             // myclub.TotalLeagues = clubdetails.total_league;
                             //myclub.ActiveLeagues = clubdetails.active_league;
                             //myclub.Teams = clubdetails.teams;
-                            myclub.TotalLeagues = 0;
+                            myclub.TotalLeagues = await getNumberOfLeagues(club.club_id);
                             myclub.ActiveLeagues = 0;
-                            myclub.Teams = 0;
+                            myclub.Teams = await getNumberOfTeams(club.club_id) ;
                             myclub.club_label = clubdetails.club_label;
 
                             listOfClubs.Add(myclub);
@@ -108,6 +119,15 @@ namespace NetClubApi.Modules.ClubModule
 
         }
 
+        public Task<int> getNumberOfTeams(int club_id)
+        {
+            return _clubDataAccess.getNumberOfTeams(club_id);
+        }
+
+        public  Task<int> getNumberOfLeagues(int club_id)
+        {
+            return _clubDataAccess.getNumberOfLeagues(club_id);
+        }
 
         public async Task<List<IClubResponse>> RegisteredClubs(int user_id)
         {
@@ -125,6 +145,14 @@ namespace NetClubApi.Modules.ClubModule
         {
             int club_id = await _clubDataAccess.getClubId(club_label);
             return await _clubDataAccess.getClubMember(club_id);
+
+        }
+
+
+        
+        public Task<string> ClubInvitation(string url, string email)
+        {
+            return _emailSender.ClubInvitation(email, url);
 
         }
     }
