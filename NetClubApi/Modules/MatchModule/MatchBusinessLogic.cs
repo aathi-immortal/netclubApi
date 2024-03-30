@@ -16,6 +16,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
         public Task<int> getTeamPlayerId(TeamModel playerOne);
         public  Task<bool> isAlreadyScheduled(int leagueId);
+        Task<string> SaveScore(MatchScoreInputModel inputModel);
         public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches, List<TeamModel> teams);
     }
     public class MatchBusinessLogic : IMatchBusinessLogic
@@ -286,6 +287,7 @@ pair.Key,pair.Value);
 
         }
 
+
         private bool search(int team2_id,List<MatchModel> matches,int minTeamId)
         {
             foreach(MatchModel match in matches)
@@ -370,5 +372,29 @@ pair.Key,pair.Value);
             }
             return false;
         }
+
+
+        public async Task<string> SaveScore(MatchScoreInputModel inputModel)
+        {
+            bool setExists = await _matchDataAccess.CheckSetExists(inputModel.MatchId, inputModel.SetNumber);
+            if (setExists)
+            {
+                return "Set number already exists for this match.";
+            }
+
+            MatchScore matchScore = new MatchScore
+            {
+                match_id = inputModel.MatchId,
+                set_number = inputModel.SetNumber,
+                team1 = inputModel.Team1Score,
+                team2 = inputModel.Team2Score
+            };
+
+            string result = await _matchDataAccess.SaveScore(matchScore);
+            return result;
+        }
+
+
+
     }
 }
