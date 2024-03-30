@@ -41,15 +41,14 @@ namespace NetClubApi.Modules.MatchModule
             return "";
         }
 
-        [HttpPut]
-        [Authorize]
-        public async Task<string> SaveScore(int score)
+        [HttpPut("SaveScore")]
+        public async Task<IActionResult> SaveScore(MatchScoreInputModel inputModel)
         {
-            return "";
+            var result = await _matchBussinessLogics.SaveScore(inputModel);
+            return Ok(result);
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<string> GetScore(int match_id)
         {
             return "";

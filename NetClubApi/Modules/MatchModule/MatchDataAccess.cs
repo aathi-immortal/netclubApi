@@ -12,6 +12,9 @@ namespace NetClubApi.Modules.MatchModule
         public Task<MatchModel> CreateMatch(MatchModel match);
         public Task<int> GetTeamPlayerId(int team_id);
         public Task<bool> isAlreadyScheduled(int leagueId);
+        Task<bool> CheckSetExists(int matchId, int setNumber);
+        Task<string> SaveScore(MatchScore matchScore);
+
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -295,6 +298,52 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
 
         }
+
+        public async Task<bool> CheckSetExists(int matchId, int setNumber)
+        {
+            string query = "SELECT COUNT(*) FROM match_score WHERE match_id = @MatchId AND set_number = @SetNumber";
+
+            using (SqlConnection connection = sqlHelper.GetConnection())
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@MatchId", matchId);
+                command.Parameters.AddWithValue("@SetNumber", setNumber);
+
+                await connection.OpenAsync();
+                int count = (int)await command.ExecuteScalarAsync();
+
+                return count > 0;
+            }
+        }
+
+        public async Task<string> SaveScore(MatchScore matchScore)
+        {
+            try
+            {
+                using (SqlConnection connection = sqlHelper.GetConnection())
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    connection.Open();
+
+                    command.CommandText = @"INSERT INTO match_score (match_id, set_number, team1, team2) 
+                                            VALUES (@MatchId, @SetNumber, @Team1Score, @Team2Score)";
+                    command.Parameters.AddWithValue("@MatchId", matchScore.match_id);
+                    command.Parameters.AddWithValue("@SetNumber", matchScore.set_number);
+                    command.Parameters.AddWithValue("@Team1Score", matchScore.team1);
+                    command.Parameters.AddWithValue("@Team2Score", matchScore.team2);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return "Score saved successfully.";
+            }
+            catch (Exception ex)
+            {
+                return $"Failed to save score: {ex.Message}";
+            }
+        }
+
+
     }
 }
 
