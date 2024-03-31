@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using MimeKit.Encodings;
 using NetClubApi.Helper;
 using NetClubApi.Model;
 
@@ -14,7 +15,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<bool> isAlreadyScheduled(int leagueId);
         Task<bool> CheckSetExists(int matchId, int setNumber);
         Task<string> SaveScore(MatchScore matchScore);
-
+        public Task<int> getCourtId(int court_id);
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -343,7 +344,37 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
         }
 
+        public async Task<int> getCourtId(int team_id)
+        {
+            try
+            {
+                int court_Id = 0;
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
 
+
+                    String query = "SELECT court_id from team where team_id = @Team_Id";
+
+
+                    using(SqlCommand command = new SqlCommand(query,myCon))
+                    {
+                        command.Parameters.AddWithValue("@Team_Id", team_id);
+                        object result = await command.ExecuteScalarAsync();
+                        if(result != null)
+                        {
+                            court_Id = Convert.ToInt32(result);
+                        }
+                    }
+                    
+                }
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            return court_Id;
+        }
     }
 }
 

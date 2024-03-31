@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 namespace NetClubApi.Modules.MatchModule
 {
     public interface IMatchBusinessLogic
+
     {
         public Task<string> CreateSchedule(MatchModel match);
         public Task<List<Schedule>> GetSchedule(int league_id);
@@ -278,7 +279,7 @@ pair.Key,pair.Value);
                 }
             }
 
-
+            PlayerIdToCourtId(matches);
             return matches;
                 
 
@@ -287,6 +288,16 @@ pair.Key,pair.Value);
 
         }
 
+        private async void PlayerIdToCourtId(List<MatchModel> matches)
+        {
+            
+            foreach(MatchModel match in matches)
+            {
+                match.court_id = await _matchDataAccess.getCourtId(match.court_id);
+
+            }
+
+        }
 
         private bool search(int team2_id,List<MatchModel> matches,int minTeamId)
         {
