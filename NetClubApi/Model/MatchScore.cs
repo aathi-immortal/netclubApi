@@ -32,7 +32,6 @@ namespace NetClubApi.Model
         public List<MatchSet> sets { get; set; }
        // public List<(int set_number, int team1_score, int team2_score)> sets { get; set; }
     }
-
     public class MatchSet
     {
         public int set_number { get; set; }

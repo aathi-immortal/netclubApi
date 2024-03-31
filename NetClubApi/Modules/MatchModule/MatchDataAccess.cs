@@ -414,6 +414,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                     return "Invalid match_id or match is not played yet";
                 }
 
+
                 return matchScoreSummary;
             }
             catch (Exception ex)

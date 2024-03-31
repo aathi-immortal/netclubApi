@@ -53,7 +53,6 @@ namespace NetClubApi.Modules.MatchModule
         {
             var result = await _matchBussinessLogics.GetMatchScoreSummary(match_id);
 
-        
             if (result is string errorMessage)
             {
                 return BadRequest(errorMessage); // Return a 400 Bad Request status with the error message

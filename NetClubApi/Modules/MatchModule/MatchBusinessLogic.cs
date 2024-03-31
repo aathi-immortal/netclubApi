@@ -407,8 +407,5 @@ pair.Key,pair.Value);
             return matchScoreSummary;
         }
 
-
-
-
     }
 }
