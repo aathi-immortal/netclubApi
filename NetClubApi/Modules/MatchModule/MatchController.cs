@@ -49,9 +49,17 @@ namespace NetClubApi.Modules.MatchModule
         }
 
         [HttpGet]
-        public async Task<string> GetScore(int match_id)
+        public async Task<IActionResult> GetMatchScoreSummary(int match_id)
         {
-            return "";
+            var result = await _matchBussinessLogics.GetMatchScoreSummary(match_id);
+
+        
+            if (result is string errorMessage)
+            {
+                return BadRequest(errorMessage); // Return a 400 Bad Request status with the error message
+            }
+
+            return Ok(result); 
         }
 
         [HttpGet]

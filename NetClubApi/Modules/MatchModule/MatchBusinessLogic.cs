@@ -16,6 +16,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<int> getTeamPlayerId(TeamModel playerOne);
         public  Task<bool> isAlreadyScheduled(int leagueId);
         Task<string> SaveScore(MatchScoreInputModel inputModel);
+        Task<object> GetMatchScoreSummary(int match_id);
         public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches, List<TeamModel> teams);
     }
     public class MatchBusinessLogic : IMatchBusinessLogic
@@ -247,6 +248,19 @@ pair.Key,pair.Value);
             string result = await _matchDataAccess.SaveScore(matchScore);
             return result;
         }
+
+        public async Task<object> GetMatchScoreSummary(int match_id)
+        {
+            var matchScoreSummary = await _matchDataAccess.GetMatchScoreSummary(match_id);
+
+            if (matchScoreSummary is string errorMessage)
+            {
+                return errorMessage;
+            }
+
+            return matchScoreSummary;
+        }
+
 
 
     }
