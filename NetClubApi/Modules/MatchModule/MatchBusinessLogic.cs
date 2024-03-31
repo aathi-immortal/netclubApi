@@ -3,6 +3,7 @@ using NetClubApi.Model;
 using NetClubApi.Model.ResponseModel;
 using Org.BouncyCastle.Utilities;
 using NetClubApi.Modules.LeagueModule;
+using System.Text.RegularExpressions;
 
 namespace NetClubApi.Modules.MatchModule
 {
@@ -59,8 +60,10 @@ namespace NetClubApi.Modules.MatchModule
                     List<MatchModel> matches = await SchedulingLogic(listOfTeams, clubId, leagueId);
                     Console.WriteLine("size fo matches   " + matches.Count);
                     //court scheduling
-                    await CourtScheduling(matches,listOfTeams);
+                    matches = await CourtScheduling(matches,listOfTeams);
 
+
+                    await createMatches(matches);
                     return "Match Scheduled Successfully";
                 }
                 return "Match is Already Scheduled";
@@ -72,6 +75,16 @@ namespace NetClubApi.Modules.MatchModule
             }
             
 
+
+        }
+
+        private async Task createMatches(List<MatchModel> matches)
+        {
+            foreach(MatchModel match in matches)
+            {
+                await _matchDataAccess.createMatch(match);
+            }
+            
 
         }
 
@@ -215,17 +228,150 @@ pair.Key,pair.Value);
 
                 
                 match.court_id = selectedCourt;
+
                 
-                await _matchDataAccess.createMatch(match);
 
 
             }
+
+            if (notFair(courts, homeCourtLimit))
+            {
+
+
+                // list of minimum home court team matches 
+                List<MatchModel> listofminteammatches = getMinTeamMatches(courts, matches, homeCourtLimit);
+
+                //list of maximum home court team mathces
+                List<MatchModel> listofmaxteammatches = getMaxTeamMatches(courts, matches, homeCourtLimit);
+
+                int maxteamid = listofmaxteammatches[0].team1_id == listofmaxteammatches[0].court_id ? listofmaxteammatches[0].team1_id : listofmaxteammatches[0].team2_id;
+
+
+                int minteamid = listofminteammatches[0].team1_id == listofminteammatches[0].court_id ? listofminteammatches[0].team2_id : listofminteammatches[0].team1_id;
+
+                Console.WriteLine("min " + minteamid);
+                Console.WriteLine("max " + maxteamid);
+                Console.WriteLine("min size " + listofminteammatches.Count);
+                foreach (MatchModel match in listofminteammatches)
+                {
+
+                    if (match.team1_id == maxteamid || match.team2_id == maxteamid)
+                    {
+                        match.court_id = minteamid;
+                        break;
+                    }
+                    else if (match.team1_id == minteamid)
+                    {
+                        if (search(match.team2_id, listofmaxteammatches,minteamid))
+                        {
+                            
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (search(match.team1_id, listofmaxteammatches,minteamid))
+                        {
+                            
+                            break;
+                        }
+                    }
+                }
+            }
+
+
             return matches;
                 
 
 
 
 
+        }
+
+
+        private bool search(int team2_id,List<MatchModel> matches,int minTeamId)
+        {
+            foreach(MatchModel match in matches)
+            {
+                if(match.team1_id == team2_id || match.team2_id == team2_id)
+                {
+                    match.court_id = minTeamId ;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private List<MatchModel> getMaxTeamMatches(Dictionary<int, int> courts, List<MatchModel> matches, int limit)
+        {
+            int maxCourtsTeamId = 0;
+            foreach (int court in courts.Keys)
+            {
+                if (courts[court] > limit)
+                {
+                    maxCourtsTeamId = court;
+                    break;
+                }
+
+            }
+
+            List<MatchModel> listOfMatches = new();
+            foreach (MatchModel match in matches)
+            {
+
+
+                if (match.team1_id == maxCourtsTeamId || match.team2_id == maxCourtsTeamId)
+                {
+                    if (match.court_id == maxCourtsTeamId)
+                    {
+                        listOfMatches.Add(match);
+                    }
+                }
+
+            }
+            return listOfMatches;
+        }
+
+            private List<MatchModel> getMinTeamMatches(Dictionary<int, int> courts, List<MatchModel> matches,int limit)
+        {
+            int minCourtsTeamId = 0;
+            foreach (int court in courts.Keys)
+            {
+                if (courts[court] < limit)
+                {
+                    minCourtsTeamId = court;
+                    break;
+                }
+
+            }
+            Console.WriteLine("min" + minCourtsTeamId);
+            List<MatchModel> listOfMatches = new();
+            foreach (MatchModel match in matches)
+            {
+
+
+                if (match.team1_id == minCourtsTeamId || match.team2_id == minCourtsTeamId)
+                {
+                    if (match.court_id != minCourtsTeamId)
+                    {
+                        listOfMatches.Add(match);
+                    }
+                }
+
+            }
+            return listOfMatches;
+        }
+
+        private bool notFair(Dictionary<int, int> courts,int limit)
+        {
+            foreach(int court in courts.Keys  )
+            {
+                if(courts[court] < limit)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
 
@@ -260,6 +406,7 @@ pair.Key,pair.Value);
 
             return matchScoreSummary;
         }
+
 
 
 
