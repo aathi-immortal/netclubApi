@@ -29,10 +29,11 @@ namespace NetClubApi.Modules.LeagueModule
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<List<League>> GetClubLeagues(int club_Id)
+        //[Authorize]
+        public async Task<List<userLeague>> GetClubLeagues(int club_Id)
         {
-            return await _leagueBussinessLayer.GetClubLeagues(club_Id);
+            int user_id = int.Parse(User.FindFirst("id").Value);
+            return await _leagueBussinessLayer.GetClubLeagues(club_Id,user_id);
         }
 
         [HttpGet]

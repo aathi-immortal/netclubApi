@@ -20,4 +20,9 @@ namespace NetClubApi.Model
         public DateTime? registration_start_date { get; set; }
         public DateTime? registration_end_date { get; set; }
     }
+
+  public class userLeague : League
+    {
+        public bool? is_join { get; set; }
+    }
 }
