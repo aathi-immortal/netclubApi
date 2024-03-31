@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using MimeKit.Encodings;
 using NetClubApi.Helper;
 using NetClubApi.Model;
 
@@ -15,7 +14,11 @@ namespace NetClubApi.Modules.MatchModule
         public Task<bool> isAlreadyScheduled(int leagueId);
         Task<bool> CheckSetExists(int matchId, int setNumber);
         Task<string> SaveScore(MatchScore matchScore);
+
         public Task<int> getCourtId(int court_id);
+
+        public Task<object> GetMatchScoreSummary(int matchId);
+
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -344,37 +347,123 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
         }
 
+
         public async Task<int> getCourtId(int team_id)
         {
+            int court_Id = 0;
             try
             {
-                int court_Id = 0;
+                
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     await myCon.OpenAsync();
-
-
                     String query = "SELECT court_id from team where team_id = @Team_Id";
 
 
-                    using(SqlCommand command = new SqlCommand(query,myCon))
+                    using (SqlCommand command = new SqlCommand(query, myCon))
                     {
                         command.Parameters.AddWithValue("@Team_Id", team_id);
                         object result = await command.ExecuteScalarAsync();
-                        if(result != null)
+                        if (result != null)
                         {
                             court_Id = Convert.ToInt32(result);
                         }
                     }
-                    
+
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
             return court_Id;
         }
+
+    
+
+        
+
+        public async Task<object> GetMatchScoreSummary(int match_id)
+        {
+            MatchScoreSummary matchScoreSummary = null;
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+                    string sqlQuery = @"
+                SELECT
+                    [dbo].[match].match_id,
+                    [dbo].[match].league_id,
+                    team1.team_id AS team1_id,
+                    team1.team_name AS team1_name,
+                    team2.team_id AS team2_id,
+                    team2.team_name AS team2_name,
+                    [dbo].[match_score].set_number,
+                    [dbo].[match_score].team1 AS team1_score,
+                    [dbo].[match_score].team2 AS team2_score
+                FROM
+                    [dbo].[match]
+                INNER JOIN
+                    [dbo].[match_score] ON [dbo].[match].match_id = [dbo].[match_score].match_id
+                INNER JOIN
+                    [dbo].[team] team1 ON [dbo].[match].team1_id = team1.team_id
+                INNER JOIN
+                    [dbo].[team] team2 ON [dbo].[match].team2_id = team2.team_id
+                WHERE
+                    [dbo].[match].match_id = @MatchId";
+
+                    using (SqlCommand myCommand = new SqlCommand(sqlQuery, myCon))
+                    {
+                        myCommand.Parameters.AddWithValue("@MatchId", match_id);
+                        using (SqlDataReader reader = await myCommand.ExecuteReaderAsync())
+                        {
+                            while (reader.Read())
+                            {
+                                // If matchScoreSummary is not initialized, create a new one
+                                if (matchScoreSummary == null)
+                                {
+                                    matchScoreSummary = new MatchScoreSummary
+                                    {
+                                        match_id = (int)reader["match_id"],
+                                        league_id = (int)reader["league_id"],
+                                        team1_id = (int)reader["team1_id"],
+                                        team2_id = (int)reader["team2_id"],
+                                        sets = new List<MatchSet>()
+                                    };
+                                }
+
+                                // Populate the MatchSet object
+                                MatchSet matchSet = new MatchSet
+                                {
+                                    set_number = (int)reader["set_number"],
+                                    team1score = (int)reader["team1_score"],
+                                    team2score = (int)reader["team2_score"]
+                                };
+
+                                // Add the MatchSet to the sets list
+                                matchScoreSummary.sets.Add(matchSet);
+                            }
+                        }
+                    }
+                }
+
+                // If matchScoreSummary is null, it means no data was found for the provided match_id
+                if (matchScoreSummary == null)
+                {
+                    return "Invalid match_id or match is not played yet";
+                }
+
+
+                return matchScoreSummary;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
     }
 }
 
