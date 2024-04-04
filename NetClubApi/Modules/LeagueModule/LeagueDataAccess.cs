@@ -13,7 +13,7 @@ namespace NetClubApi.Modules.LeagueModule
     {
         public Task<string> CreateLeague(League league, int user_id);
         public Task<League> GetLeague(int league_id);
-        public Task<List<League>> GetLeagues(int club_id);
+        public Task<List<userLeague>> GetLeagues(int club_id,int user_id);
         Task<List<TeamModel>> getLeagueTeams(int league_id);
         public Task<List<LeagueRegistration>> GetMyLeagues(int user_id);
         Task<int?> getNumberOfMatches(int league_id);
@@ -77,11 +77,69 @@ namespace NetClubApi.Modules.LeagueModule
             return true;
         }
 
-        public async Task<List<League>> GetLeagues(int club_Id)
+        public async Task<List<userLeague>> GetLeagues(int club_Id,int user_id)
         {
-            List<League> leagues = await netClubDbContext.league.Where(league => league.club_id == club_Id).ToListAsync();
+            List<userLeague> leagues = new List<userLeague>();
+            using (SqlConnection myCon = sqlHelper.GetConnection())
+            {
+             
+        myCon.Open();
+    string sqlquery = $@"
+ select 
+[dbo].[league].id ,
+[dbo].[league].name ,
+[dbo].[league].club_id ,
+[dbo].[league].start_date ,
+[dbo].[league].end_date ,
+[dbo].[league].league_type_id ,
+[dbo].[league].schedule_type_id ,
+[dbo].[league].number_of_teams ,
+[dbo].[league].number_of_teams_playoffs ,
+[dbo].[league].playoff_start_date ,
+[dbo].[league].playoff_end_date ,
+[dbo].[league].playoff_type_id ,
+[dbo].[league].registration_start_date ,
+[dbo].[league].registration_end_date,
+[dbo].[league_registration].user_id 
+from [dbo].[league] 
+left join [dbo].[league_registration] on 
+[dbo].[league_registration].league_id= [dbo].[league].id 
+and [dbo].[league_registration].user_id ={user_id}
+where [dbo].[league].club_id = '{club_Id}'
+    ";
+                    using (SqlCommand myCommand1 = new SqlCommand(sqlquery, myCon))
+                    {
+                       SqlDataReader reader= myCommand1.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                        while(reader.Read())
+                        {
+                            Console.WriteLine(reader.IsDBNull(14));
+                         
+                            userLeague league = new userLeague {
+                            Id = (int)reader["id"],
+                            name = (string)reader["name"],
+                            club_id = (int)reader["club_id"],
+                            start_date = (DateTime)reader["start_date"],
+                            end_date = (DateTime)reader["end_date"],
+                            league_type_id = (int)reader["league_type_id"],
+                            schedule_type_id = (int)reader["schedule_type_id"],
+                            number_of_teams = (int)reader["number_of_teams"],
+                            number_of_teams_playoffs = (int)reader["number_of_teams_playoffs"],
+                            playoff_start_date = (DateTime)reader["playoff_start_date"],
+                            playoff_end_date = (DateTime)reader["playoff_end_date"],
+                            playoff_type_id = (int)reader["playoff_type_id"],
+                            registration_start_date = (DateTime)reader["registration_start_date"],
+                            registration_end_date = (DateTime)reader["registration_end_date"],
+                            is_join= !reader.IsDBNull(14)
+                            };
+                        leagues.Add(league);
+                        }
+                    }
+                    }
+                myCon.Close();
+            }
             return leagues;
-
         }
 
         public async Task<List<TeamModel>> getLeagueTeams(int league_id)

@@ -7,7 +7,7 @@ namespace NetClubApi.Modules.LeagueModule
     public interface ILeagueBussinessLayer
     {
         public Task<string> CreateLeague(League league,int user_id);
-        public Task<List<League>> GetClubLeagues(int club_id);
+        public Task<List<userLeague>> GetClubLeagues(int club_id,int user_id);
         public Task<List<TeamModel>> GetLeagueTeams(int league_id);
         public Task<List<LeagueResponse>> ConvertToLeagueResponse(List<League> leagues);
         public Task<string> RegisterLeague(LeagueRegistration league);
@@ -34,10 +34,9 @@ namespace NetClubApi.Modules.LeagueModule
         {
              return await _dataAccess.CreateLeague(league,user_id);
         }
-        public async Task<List<League>> GetClubLeagues(int club_id)
+        public async Task<List<userLeague>> GetClubLeagues(int club_id,int user_id)
         {
-            List<League> leagues = await _dataAccess.GetLeagues(club_id);
-           // List<LeagueResponse> leagueResponses = await ConvertToLeagueResponse(leagues);
+            List<userLeague> leagues = await _dataAccess.GetLeagues(club_id,user_id);
             return leagues;
         }
 

@@ -19,7 +19,7 @@ namespace NetClubApi.Modules.TeamModule
         {
             int user_id = int.Parse(User.FindFirst("id").Value);
             return await _teamBussinessLogics.CreateTeam(team, user_id);
-            ; }
+        }
 
         [HttpPost]
         public async Task<string> AddTeamMembers(AddMember members)

@@ -45,10 +45,20 @@ namespace NetClubApi.Modules.TeamModule
                         }
                     }
                     string leagueUpdate = $@"update [dbo].[league] set number_of_teams = number_of_teams + 1 where id = @League_id";
-                    using (SqlCommand cmd = new SqlCommand(leagueUpdate, myCon))
+                    using (SqlCommand cmd1 = new SqlCommand(leagueUpdate, myCon))
                     {
-                        cmd.Parameters.AddWithValue("@League_id", team.league_id);
-                        cmd.ExecuteNonQuery();
+                        cmd1.Parameters.AddWithValue("@League_id", team.league_id);
+                        cmd1.ExecuteNonQuery();
+                        Console.WriteLine("Inserted row ID:1");
+                    }
+
+                   // string leagueRegistration = $@"insert into [dbo].[league_registration] values(@culb_id,@league_id,@user_id)";
+                    string leagueRegistration = $@"INSERT INTO [dbo].[league_registration] (club_id,league_id,user_id)
+                                   VALUES ('{team.club_id}','{team.league_id}','{user_id}')";
+                    using (SqlCommand cmd3 = new SqlCommand(leagueRegistration, myCon))
+                    {
+                        cmd3.ExecuteNonQuery();
+                        Console.WriteLine("Inserted row ID:2");
                     }
 
 
@@ -88,16 +98,6 @@ namespace NetClubApi.Modules.TeamModule
                         //updating league table
                         
                         myCon.Close();
-
-
-
-
-
-
-
-
-
-
 
                     }
                 }
