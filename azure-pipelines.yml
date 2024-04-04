@@ -34,3 +34,6 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'webapp'
     publishLocation: 'Container'
+    MaxArtifactSize: 2
+
+    
