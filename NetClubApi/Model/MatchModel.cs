@@ -20,6 +20,10 @@ namespace NetClubApi.Model
 
         public int point { get; set; }
         public int rating { get; set; }
+        public int team1_point { get; set; }
+        public int team1_rating{ get; set; }
+        public int team2_point { get; set; }
+        public int team2_rating{ get; set; }
     }
     public class Schedule
     {
@@ -30,6 +34,10 @@ namespace NetClubApi.Model
         public string? end_date { get; set; }
         public int? score{ get; set; }
         public string? venue { get; set; }
+        public int team1_point { get; set; }
+        public int team1_rating { get; set; }
+        public int team2_point { get; set; }
+        public int team2_rating { get; set; }
     }
     public class Team
     {

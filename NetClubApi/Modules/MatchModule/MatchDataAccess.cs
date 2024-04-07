@@ -13,13 +13,17 @@ namespace NetClubApi.Modules.MatchModule
         public Task<int> GetTeamPlayerId(int team_id);
         public Task<bool> isAlreadyScheduled(int leagueId);
         Task<bool> CheckSetExists(int matchId, int setNumber);
-        Task<string> SaveScore(MatchScore matchScore);
 
+        public Task<string> SaveMatchScore(MatchScoreWrapper matchScore);
         public Task<int> getCourtId(int court_id);
 
-        public Task<object> GetMatchScoreSummary(int matchId);
-        Task<string> SaveMatchScore(MatchScoreWrapper matchScore);
+        
         Task<string> SaveSetScore(MatchSetScoreWrapper setScore);
+
+        public Task<MatchScoreSummary> GetMatchScoreSummary(int matchId);
+        public Task<List<MatchScoreSummary>> GetLeagueScores(int league_id);
+
+
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -30,9 +34,6 @@ namespace NetClubApi.Modules.MatchModule
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                   
-                   // string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
-                    //               VALUES ({match.club_id},{match.league_id},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
                     string sql3= @"INSERT INTO[match]
                                         (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating)
                                         VALUES
@@ -82,6 +83,10 @@ namespace NetClubApi.Modules.MatchModule
     [dbo].[match].start_date start_date,
     [dbo].[match].end_date end_date,
     [dbo].[match].point,
+[dbo].[match].team1_point,
+[dbo].[match].team1_rating,
+[dbo].[match].team2_point,
+[dbo].[match].team2_rating,
     [dbo].[court].court_name court_name 
 FROM 
      [dbo].[match]
@@ -108,7 +113,11 @@ where [dbo].[match].league_id={league_id}";
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
-                                    venue = (string)reader["court_name"]
+                                    venue = (string)reader["court_name"],
+                                    team1_point = (int)reader["team1_point"],
+                                    team1_rating = (int)reader["team1_rating"],
+                                    team2_point = (int)reader["team2_point"],
+                                    team2_rating = (int)reader["team2_rating"]
                                 };
                                 schedules.Add(schedule);
                             }
@@ -143,6 +152,10 @@ team2.team_id team2_id,team2.team_name team2name,
 [dbo].[match].start_date start_date,
 [dbo].[match].end_date end_date,
 [dbo].[match].point,
+[dbo].[match].team1_point,
+[dbo].[match].team1_rating,
+[dbo].[match].team2_point,
+[dbo].[match].team2_rating,
 [dbo].[court].court_name court_name 
 from [dbo].[match] 
 JOIN [dbo].[team] team1 ON team1.team_id=[dbo].[match].team1_id
@@ -165,7 +178,11 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
-                                    venue = (string)reader["court_name"]
+                                    venue = (string)reader["court_name"],
+                                    team1_point = (int)reader["team1_point"],
+                                    team1_rating = (int)reader["team1_rating"],
+                                    team2_point = (int)reader["team2_point"],
+                                    team2_rating = (int)reader["team2_rating"]
                                 };
                                 matches.Add(match);
                             }
@@ -321,34 +338,6 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
         }
 
-        public async Task<string> SaveScore(MatchScore matchScore)
-        {
-            try
-            {
-                using (SqlConnection connection = sqlHelper.GetConnection())
-                using (SqlCommand command = connection.CreateCommand())
-                {
-                    connection.Open();
-
-                    command.CommandText = @"INSERT INTO match_score (match_id, set_number, team1, team2) 
-                                            VALUES (@MatchId, @SetNumber, @Team1Score, @Team2Score)";
-                    command.Parameters.AddWithValue("@MatchId", matchScore.match_id);
-                    command.Parameters.AddWithValue("@SetNumber", matchScore.set_number);
-                    command.Parameters.AddWithValue("@Team1Score", matchScore.team1);
-                    command.Parameters.AddWithValue("@Team2Score", matchScore.team2);
-
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                return "Score saved successfully.";
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to save score: {ex.Message}";
-            }
-        }
-
-
         public async Task<int> getCourtId(int team_id)
         {
             int court_Id = 0;
@@ -384,9 +373,10 @@ where[dbo].[team_member].team_member_user_id={user_id}";
 
         
 
-        public async Task<object> GetMatchScoreSummary(int match_id)
+        public async Task<MatchScoreSummary> GetMatchScoreSummary(int match_id)
         {
-            MatchScoreSummary matchScoreSummary = null;
+            MatchScoreSummary matchScoreSummary = new MatchScoreSummary();
+            Boolean flag = true;
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -421,9 +411,9 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         {
                             while (reader.Read())
                             {
-                                // If matchScoreSummary is not initialized, create a new one
-                                if (matchScoreSummary == null)
+                                if (flag)
                                 {
+                                    
                                     matchScoreSummary = new MatchScoreSummary
                                     {
                                         match_id = (int)reader["match_id"],
@@ -432,6 +422,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                                         team2_id = (int)reader["team2_id"],
                                         sets = new List<MatchSet>()
                                     };
+                                    flag = false;
                                 }
 
                                 // Populate the MatchSet object
@@ -448,14 +439,6 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         }
                     }
                 }
-
-                // If matchScoreSummary is null, it means no data was found for the provided match_id
-                if (matchScoreSummary == null)
-                {
-                    return "Invalid match_id or match is not played yet";
-                }
-
-
                 return matchScoreSummary;
             }
             catch (Exception ex)
@@ -463,6 +446,57 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                 Console.WriteLine(ex.Message);
                 throw;
             }
+        }
+        public async Task<List<MatchScoreSummary>> GetLeagueScores(int league_id)
+        {
+            List<MatchScoreSummary> match_scores = new List<MatchScoreSummary>();
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql3 = $@"
+select [dbo].[match].match_id,[dbo].[match].league_id,[dbo].[match].team1_id,[dbo].[match].team2_id from [dbo].[match] where [dbo].[match].league_id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql3, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int match_id = (int)reader["match_id"];
+                                MatchScoreSummary match_score = await GetMatchScoreSummary(match_id);
+                                if (match_score.league_id == 0)
+                                {
+                                    match_score.match_id = match_id;
+                                    match_score.league_id = (int)reader["league_id"];
+                                    int team1IdIndex = reader.GetOrdinal("team1_id");
+                                    match_score.team1_id = reader.GetInt32(team1IdIndex);
+                                    int team2IdIndex = reader.GetOrdinal("team2_id");
+                                    match_score.team2_id = reader.GetInt32(team2IdIndex);
+
+
+
+                                    match_scores.Add(match_score);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+            return match_scores;
+
         }
 
         public async Task<string> SaveMatchScore(MatchScoreWrapper matchScore)
@@ -486,7 +520,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                 match_id = @MatchId;
         ";
 
-                    using(SqlCommand command = new SqlCommand(updateQuery,myCon))
+                    using (SqlCommand command = new SqlCommand(updateQuery, myCon))
                     {
                         command.Parameters.AddWithValue("@Team1Point", matchScore.Team1Score);
                         command.Parameters.AddWithValue("@Team2Point", matchScore.Team2Score);
@@ -499,28 +533,28 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 return ex.ToString();
             }
             return "match table  updated";
-          }
+        }
         public async Task<string> SaveSetScore(MatchSetScoreWrapper setScore)
         {
-            if(setScore.TeamOneScore < 0 || setScore.TeamTwoScore < 0)
+            if (setScore.TeamOneScore < 0 || setScore.TeamTwoScore < 0)
             {
                 return "updated";
             }
             try
             {
-                using(SqlConnection con = sqlHelper.GetConnection())
+                using (SqlConnection con = sqlHelper.GetConnection())
                 {
                     await con.OpenAsync();
                     string query = @"insert into match_score (match_id,set_number,team1,team2) values (@MatchId,@SetNumber,@TeamOne,@TeamTwo)";
-                    using(SqlCommand command = new SqlCommand(query,con))
+                    using (SqlCommand command = new SqlCommand(query, con))
                     {
                         command.Parameters.AddWithValue("@MatchId", setScore.MatchId);
                         command.Parameters.AddWithValue("@SetNumber", setScore.Set);
@@ -531,12 +565,13 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 return ex.ToString();
             }
             return "setScore inserted";
+
         }
     }
 }

@@ -69,8 +69,11 @@ namespace NetClubApi.Modules.LeagueModule
         {
             return await _leagueBussinessLayer.InvitePlayer(email, url);
         }
-
-
+        [HttpGet]
+        public async Task<League> getLeagueById(int league_id)
+        {
+            return await _leagueDataAccess.GetLeague(league_id);
+        }
         
         
 
