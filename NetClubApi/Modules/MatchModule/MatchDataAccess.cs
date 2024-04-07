@@ -81,6 +81,10 @@ namespace NetClubApi.Modules.MatchModule
     [dbo].[match].start_date start_date,
     [dbo].[match].end_date end_date,
     [dbo].[match].point,
+[dbo].[match].team1_point,
+[dbo].[match].team1_rating,
+[dbo].[match].team2_point,
+[dbo].[match].team2_rating,
     [dbo].[court].court_name court_name 
 FROM 
      [dbo].[match]
@@ -107,7 +111,11 @@ where [dbo].[match].league_id={league_id}";
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
-                                    venue = (string)reader["court_name"]
+                                    venue = (string)reader["court_name"],
+                                    team1_point = (int)reader["team1_point"],
+                                    team1_rating = (int)reader["team1_rating"],
+                                    team2_point = (int)reader["team2_point"],
+                                    team2_rating = (int)reader["team2_rating"]
                                 };
                                 schedules.Add(schedule);
                             }
@@ -142,6 +150,10 @@ team2.team_id team2_id,team2.team_name team2name,
 [dbo].[match].start_date start_date,
 [dbo].[match].end_date end_date,
 [dbo].[match].point,
+[dbo].[match].team1_point,
+[dbo].[match].team1_rating,
+[dbo].[match].team2_point,
+[dbo].[match].team2_rating,
 [dbo].[court].court_name court_name 
 from [dbo].[match] 
 JOIN [dbo].[team] team1 ON team1.team_id=[dbo].[match].team1_id
@@ -164,7 +176,11 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
-                                    venue = (string)reader["court_name"]
+                                    venue = (string)reader["court_name"],
+                                    team1_point = (int)reader["team1_point"],
+                                    team1_rating = (int)reader["team1_rating"],
+                                    team2_point = (int)reader["team2_point"],
+                                    team2_rating = (int)reader["team2_rating"]
                                 };
                                 matches.Add(match);
                             }

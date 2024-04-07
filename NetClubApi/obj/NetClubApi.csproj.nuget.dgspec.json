@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "E:\\clubmanagement\\NetClubApi\\NetClubApi\\NetClubApi.csproj": {}
+    "D:\\Project\\NetClub\\Service\\NetClubApi\\NetClubApi.csproj": {}
   },
   "projects": {
-    "E:\\clubmanagement\\NetClubApi\\NetClubApi\\NetClubApi.csproj": {
+    "D:\\Project\\NetClub\\Service\\NetClubApi\\NetClubApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\clubmanagement\\NetClubApi\\NetClubApi\\NetClubApi.csproj",
+        "projectUniqueName": "D:\\Project\\NetClub\\Service\\NetClubApi\\NetClubApi.csproj",
         "projectName": "NetClubApi",
-        "projectPath": "E:\\clubmanagement\\NetClubApi\\NetClubApi\\NetClubApi.csproj",
-        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "E:\\clubmanagement\\NetClubApi\\NetClubApi\\obj\\",
+        "projectPath": "D:\\Project\\NetClub\\Service\\NetClubApi\\NetClubApi.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "D:\\Project\\NetClub\\Service\\NetClubApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -124,7 +124,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "E:\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
