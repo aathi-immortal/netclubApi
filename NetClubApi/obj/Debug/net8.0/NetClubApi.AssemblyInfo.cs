@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NetClubApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fdc73cc51ea8f52a8da1e87f0e02624d5120222f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+044c490cf32369b0916fa1e5c2ce558024f42e4b")]
 [assembly: System.Reflection.AssemblyProductAttribute("NetClubApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NetClubApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

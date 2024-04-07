@@ -13,11 +13,12 @@ namespace NetClubApi.Modules.MatchModule
     public class MatchController : ControllerBase
     {
         private readonly IMatchBusinessLogic _matchBussinessLogics;
-        //private readonly IMatchDataAccess _matchDataAccess;
+        private readonly IMatchDataAccess _matchDataAccess;
 
-        public MatchController(IMatchBusinessLogic matchBussinessLogic)
+        public MatchController(IMatchBusinessLogic matchBussinessLogic, IMatchDataAccess matchDataAccess)
         {
             _matchBussinessLogics = matchBussinessLogic;
+            _matchDataAccess = matchDataAccess;
         }
         [HttpPost]
         //[Authorize]
@@ -49,16 +50,14 @@ namespace NetClubApi.Modules.MatchModule
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMatchScoreSummary(int match_id)
+        public async Task<MatchScoreSummary> GetMatchScoreSummary(int match_id)
         {
-            var result = await _matchBussinessLogics.GetMatchScoreSummary(match_id);
-
-            if (result is string errorMessage)
-            {
-                return BadRequest(errorMessage); // Return a 400 Bad Request status with the error message
-            }
-
-            return Ok(result); 
+            return await _matchBussinessLogics.GetMatchScoreSummary(match_id);
+        }
+        [HttpGet]
+        public async Task<List<MatchScoreSummary>> GetLeagueScores(int league_id)
+        {
+            return await _matchDataAccess.GetLeagueScores(league_id);
         }
 
         [HttpGet]

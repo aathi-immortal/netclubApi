@@ -17,7 +17,8 @@ namespace NetClubApi.Modules.MatchModule
 
         public Task<int> getCourtId(int court_id);
 
-        public Task<object> GetMatchScoreSummary(int matchId);
+        public Task<MatchScoreSummary> GetMatchScoreSummary(int matchId);
+        public Task<List<MatchScoreSummary>> GetLeagueScores(int league_id);
 
     }
     public class MatchDataAccess : IMatchDataAccess
@@ -29,9 +30,6 @@ namespace NetClubApi.Modules.MatchModule
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                   
-                   // string sql1 = $@"INSERT INTO [dbo].[match] (club_id, league_id, team1_id, team2_id,player1_id,player2_id,start_date,end_date,court_id,point)
-                    //               VALUES ({match.club_id},{match.league_id},{match.team1_id},    {match.team2_id},{match.player1_id},'{match.player2_id},'{match.start_date}','{match.end_date}',{match.court_id},{0})";
                     string sql3= @"INSERT INTO[match]
                                         (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating)
                                         VALUES
@@ -399,9 +397,10 @@ where[dbo].[team_member].team_member_user_id={user_id}";
 
         
 
-        public async Task<object> GetMatchScoreSummary(int match_id)
+        public async Task<MatchScoreSummary> GetMatchScoreSummary(int match_id)
         {
-            MatchScoreSummary matchScoreSummary = null;
+            MatchScoreSummary matchScoreSummary = new MatchScoreSummary();
+            Boolean flag = true;
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -436,9 +435,9 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         {
                             while (reader.Read())
                             {
-                                // If matchScoreSummary is not initialized, create a new one
-                                if (matchScoreSummary == null)
+                                if (flag)
                                 {
+                                    
                                     matchScoreSummary = new MatchScoreSummary
                                     {
                                         match_id = (int)reader["match_id"],
@@ -447,6 +446,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                                         team2_id = (int)reader["team2_id"],
                                         sets = new List<MatchSet>()
                                     };
+                                    flag = false;
                                 }
 
                                 // Populate the MatchSet object
@@ -463,14 +463,6 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         }
                     }
                 }
-
-                // If matchScoreSummary is null, it means no data was found for the provided match_id
-                if (matchScoreSummary == null)
-                {
-                    return "Invalid match_id or match is not played yet";
-                }
-
-
                 return matchScoreSummary;
             }
             catch (Exception ex)
@@ -479,7 +471,54 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                 throw;
             }
         }
+        public async Task<List<MatchScoreSummary>> GetLeagueScores(int league_id)
+        {
+            List<MatchScoreSummary> match_scores = new List<MatchScoreSummary>();
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql3 = $@"
+select [dbo].[match].match_id,[dbo].[match].league_id,[dbo].[match].team1_id,[dbo].[match].team2_id from [dbo].[match] where [dbo].[match].league_id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql3, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int match_id = (int)reader["match_id"];
+                                MatchScoreSummary match_score = await GetMatchScoreSummary(match_id);
+                                if (match_score.league_id==0)
+                                {
+                                    match_score.match_id = match_id;
+                                    match_score.league_id = (int)reader["league_id"];
+                                    int team1IdIndex = reader.GetOrdinal("team1_id");
+                                    match_score.team1_id = reader.GetInt32(team1IdIndex);
+                                    int team2IdIndex = reader.GetOrdinal("team2_id");
+                                    match_score.team2_id = reader.GetInt32(team2IdIndex);
 
+                                }
+                                match_scores.Add(match_score);
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+            return match_scores;
+        }
     }
 }
 
