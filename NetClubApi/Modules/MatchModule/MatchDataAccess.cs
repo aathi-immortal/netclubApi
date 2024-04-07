@@ -18,7 +18,8 @@ namespace NetClubApi.Modules.MatchModule
         public Task<int> getCourtId(int court_id);
 
         public Task<object> GetMatchScoreSummary(int matchId);
-
+        Task<string> SaveMatchScore(MatchScoreWrapper matchScore);
+        Task<string> SaveSetScore(MatchSetScoreWrapper setScore);
     }
     public class MatchDataAccess : IMatchDataAccess
     {
@@ -464,6 +465,79 @@ where[dbo].[team_member].team_member_user_id={user_id}";
             }
         }
 
+        public async Task<string> SaveMatchScore(MatchScoreWrapper matchScore)
+        {
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    await myCon.OpenAsync();
+                    string updateQuery = @"
+            UPDATE match
+            SET 
+                team1_point = @Team1Point,
+                team2_point = @Team2Point,
+                team1_rating = @Team1Rating,
+                team2_rating = @Team2Rating,
+                winning_team = @WinningTeam,
+                win_by_default = @WinByDefault,
+                team_retired = @TeamRetired
+            WHERE
+                match_id = @MatchId;
+        ";
+
+                    using(SqlCommand command = new SqlCommand(updateQuery,myCon))
+                    {
+                        command.Parameters.AddWithValue("@Team1Point", matchScore.Team1Score);
+                        command.Parameters.AddWithValue("@Team2Point", matchScore.Team2Score);
+                        command.Parameters.AddWithValue("@Team1Rating", matchScore.Team1Rating);
+                        command.Parameters.AddWithValue("@Team2Rating", matchScore.Team2Rating);
+                        command.Parameters.AddWithValue("@WinningTeam", matchScore.WinningTeam);
+                        command.Parameters.AddWithValue("@WinByDefault", matchScore.WinByDefault);
+                        command.Parameters.AddWithValue("@TeamRetired", matchScore.TeamRetired);
+                        command.Parameters.AddWithValue("@MatchId", matchScore.MatchId);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+                
+            }
+            catch(Exception ex)
+            {
+
+                return ex.ToString();
+            }
+            return "match table  updated";
+          }
+        public async Task<string> SaveSetScore(MatchSetScoreWrapper setScore)
+        {
+            if(setScore.TeamOneScore < 0 || setScore.TeamTwoScore < 0)
+            {
+                return "updated";
+            }
+            try
+            {
+                using(SqlConnection con = sqlHelper.GetConnection())
+                {
+                    await con.OpenAsync();
+                    string query = @"insert into match_score (match_id,set_number,team1,team2) values (@MatchId,@SetNumber,@TeamOne,@TeamTwo)";
+                    using(SqlCommand command = new SqlCommand(query,con))
+                    {
+                        command.Parameters.AddWithValue("@MatchId", setScore.MatchId);
+                        command.Parameters.AddWithValue("@SetNumber", setScore.Set);
+                        command.Parameters.AddWithValue("@TeamOne", setScore.TeamOneScore);
+                        command.Parameters.AddWithValue("@TeamTwo", setScore.TeamTwoScore);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+
+            }
+            catch(Exception ex)
+            {
+
+                return ex.ToString();
+            }
+            return "setScore inserted";
+        }
     }
 }
 

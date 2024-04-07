@@ -388,23 +388,86 @@ pair.Key,pair.Value);
 
         public async Task<string> SaveScore(MatchScoreInputModel inputModel)
         {
-            bool setExists = await _matchDataAccess.CheckSetExists(inputModel.MatchId, inputModel.SetNumber);
-            if (setExists)
-            {
-                return "Set number already exists for this match.";
-            }
+            //bool setExists = await _matchDataAccess.CheckSetExists(inputModel.MatchId, inputModel.SetNumber);
+            //if (setExists)
+            //{
+            //    return "Set number already exists for this match.";
+            //}
 
-            MatchScore matchScore = new MatchScore
+            //MatchScore matchScore = new MatchScore
+            //{
+            //    match_id = inputModel.MatchId,
+            //    set_number = inputModel.SetNumber,
+            //    team1 = inputModel.Team1Score,
+            //    team2 = inputModel.Team2Score
+            //};
+            MatchScoreWrapper matchScore = new MatchScoreWrapper
             {
-                match_id = inputModel.MatchId,
-                set_number = inputModel.SetNumber,
-                team1 = inputModel.Team1Score,
-                team2 = inputModel.Team2Score
+                MatchId = inputModel.MatchId,
+                Team1Score = inputModel.Team1Score,
+                Team2Score = inputModel.Team2Score,
+                Team1Rating = inputModel.Team1Rating,
+                Team2Rating = inputModel.Team2Rating,
+                WinningTeam = inputModel.WinningTeam,
+                WinByDefault = inputModel.WinByDefault,
+                TeamRetired = inputModel.TeamRetired
+               
+                
+            };
+            //MatchScoreInputModel setScore = new MatchScoreInputModel
+            //{
+            //    MatchId = inputModel.MatchId,
+            //    TeamOneSetScore = inputModel.TeamOneSetScore,
+            //    TeamTwoSetScore = inputModel.TeamTwoSetScore
+
+
+            //};
+
+            string result = await _matchDataAccess.SaveMatchScore(matchScore);
+            MatchSetScoreWrapper setScore = new MatchSetScoreWrapper
+            {
+                MatchId = inputModel.MatchId,
+                Set = 1,
+                TeamOneScore = inputModel.TeamOneSetScore.SetScores[0],
+                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[0],
+                
             };
 
-            string result = await _matchDataAccess.SaveScore(matchScore);
+            result = await _matchDataAccess.SaveSetScore(setScore);
+            setScore = new MatchSetScoreWrapper
+            {
+                MatchId = inputModel.MatchId,
+                Set = 2,
+                TeamOneScore = inputModel.TeamOneSetScore.SetScores[1],
+                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[1],
+
+            };
+            result = await _matchDataAccess.SaveSetScore(setScore);
+            setScore = new MatchSetScoreWrapper
+            {
+                MatchId = inputModel.MatchId,
+                Set = 3,
+                TeamOneScore = inputModel.TeamOneSetScore.SetScores[2],
+                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[2],
+
+            };
+
+            result = await _matchDataAccess.SaveSetScore(setScore);
+
+
+
+
+
+
+
             return result;
+            //store in the match table 
+
+            
+
         }
+
+        
 
         public async Task<object> GetMatchScoreSummary(int match_id)
         {
