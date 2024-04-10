@@ -1,0 +1,14 @@
+﻿truncate table match_score;
+select * from match;
+select * from match where match_id = 1;
+select  * from match_score where match_id = 1;
+delete from match_score where match_id = 1;
+select count(*) from match;
+select * from team where league_id = 1;
+select count(*) from match where court_id = 1;  
+select count(*) from match where court_id = 2;  
+select count(*) from match where court_id = 3;  
+select count(*) from match where court_id = 4;  
+select count(*) from match where court_id = 43;
+select count(*) from match where court_id = 44;
+select count(*) from match where court_id = 49;

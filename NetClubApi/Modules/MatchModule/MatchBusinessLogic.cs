@@ -32,7 +32,7 @@ namespace NetClubApi.Modules.MatchModule
         }
         public async Task<string> CreateSchedule(MatchModel match)
         {
-            await _matchDataAccess.CreateMatch(match);
+            await _matchDataAccess.createMatch(match);
             return "success";
         }
 

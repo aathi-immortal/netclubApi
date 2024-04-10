@@ -217,8 +217,8 @@ namespace NetClubApi.Modules.TeamModule
             }
         }
         public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
-        {/*
-            List<TeamModel> teams= new List<TeamModel>();
+        {
+            List<TeamModel> teams = new List<TeamModel>();
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -233,17 +233,22 @@ namespace NetClubApi.Modules.TeamModule
 
                             while (reader.Read())
                             {
-                                TeamModel team= new TeamModel
+                                TeamModel team = new TeamModel
                                 {
-                                     = (int)reader["match_id"],
-                                    team1 = new Team { team_id = (int)reader["team1_id"], team_name = (string)reader["team1name"] },
-                                    team2 = new Team { team_id = (int)reader["team2_id"], team_name = (string)reader["team2name"] },
-                                    start_date = $"{(DateTime)reader["start_date"]}",
-                                    end_date = $"{(DateTime)reader["end_date"]}",
-                                    score = (int)reader["point"],
-                                    venue = (string)reader["court_name"]
+                                     club_id= (int)reader["club_id"],
+                                    team_id = (int)reader["team_id"],
+                                     team_name = (string)reader[ "team_name"],
+                                     court_id = (int)reader["court_id"],
+                                     points = (int)reader["points"],
+                                     rating = (int)reader["rating"],
+                                     league_id = (int)reader["league_id"]
+                                     
+
+                    
+                                    
+                                  
                                 };
-                                schedules.Add(schedule);
+                                teams.Add(team);
                             }
                         }
                         else
@@ -253,13 +258,14 @@ namespace NetClubApi.Modules.TeamModule
                         myCon.Close();
                     }
                 }
+                return teams;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
-            }*/
-            return [];
+            }
+
         }
     }
 }

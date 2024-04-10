@@ -9,7 +9,7 @@ namespace NetClubApi.Modules.MatchModule
         public Task<string> createMatch(MatchModel match);
         public Task<List<Schedule>> getSchedule(int league_id);
         public Task<List<Schedule>> getMyMatches(int user_id);
-        public Task<MatchModel> CreateMatch(MatchModel match);
+        
         public Task<int> GetTeamPlayerId(int team_id);
         public Task<bool> isAlreadyScheduled(int leagueId);
         Task<bool> CheckSetExists(int matchId, int setNumber);
@@ -40,7 +40,7 @@ namespace NetClubApi.Modules.MatchModule
                                         (@ClubId, @LeagueId, @Team1Id, @Team2Id, @Player1Id, @Player2Id, @StartDate, @EndDate, @CourtId, @Point, @Rating)";
                     using (SqlCommand cmd = new SqlCommand(sql3, myCon))
                     {
-                        cmd.Parameters.AddWithValue("@ClubId", 38);
+                        cmd.Parameters.AddWithValue("@ClubId", match.club_id);
                         cmd.Parameters.AddWithValue("@LeagueId",match.league_id);
                         cmd.Parameters.AddWithValue("@Team1Id", match.team1_id);
                         cmd.Parameters.AddWithValue("@Team2Id", match.team2_id);
@@ -49,8 +49,8 @@ namespace NetClubApi.Modules.MatchModule
                         cmd.Parameters.AddWithValue("@StartDate", match.start_date);
                         cmd.Parameters.AddWithValue("@EndDate", match.end_date);
                         cmd.Parameters.AddWithValue("@CourtId", match.court_id);
-                        cmd.Parameters.AddWithValue("@Point", match.point);
-                        cmd.Parameters.AddWithValue("@Rating", match.rating);
+                        cmd.Parameters.AddWithValue("@Point", 0);
+                        cmd.Parameters.AddWithValue("@Rating", 0);
 
                         Console.WriteLine(match.club_id);
                     Console.WriteLine(match.league_id);
@@ -204,54 +204,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
         }
 
 
-        public async Task<MatchModel> CreateMatch(MatchModel match)
-        {
-            try
-            {
-                Console.WriteLine("jiiii");
-                using (SqlConnection myCon = sqlHelper.GetConnection())
-                {
-                    await myCon.OpenAsync();
-
-                    string insertQuery = @"INSERT INTO [match] 
-                                        (club_id, league_id, team1_id, team2_id, player1_id, player2_id, start_date, end_date, court_id, point, rating) 
-                                        VALUES 
-                                        (@ClubId, @LeagueId, @Team1Id, @Team2Id, @Player1Id, @Player2Id, @StartDate, @EndDate, @CourtId, @Point, @Rating); 
-                                        SELECT SCOPE_IDENTITY();";
-
-                    using (SqlCommand cmd = new SqlCommand(insertQuery, myCon))
-                    {
-                        cmd.Parameters.AddWithValue("@ClubId", 38);
-                        cmd.Parameters.AddWithValue("@LeagueId", 1);
-                        cmd.Parameters.AddWithValue("@Team1Id", 1);
-                        cmd.Parameters.AddWithValue("@Team2Id",1);
-                        cmd.Parameters.AddWithValue("@Player1Id", match.player1_id);
-                        cmd.Parameters.AddWithValue("@Player2Id", match.player2_id);
-                        cmd.Parameters.AddWithValue("@StartDate", match.start_date);
-                        cmd.Parameters.AddWithValue("@EndDate", match.end_date);
-                        cmd.Parameters.AddWithValue("@CourtId", match.court_id);
-                        cmd.Parameters.AddWithValue("@Point", match.point);
-                        cmd.Parameters.AddWithValue("@Rating", match.rating);
-
-                        // Execute the command and retrieve the newly inserted match ID
-                        int matchId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-
-                        // Set the match_id property of the match object
-                        match.match_id = matchId;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                // Optionally, you might want to throw the exception to propagate it further
-                throw;
-            }
-
-            return match;
-
-        }
-
+        
         public async Task<int> GetTeamPlayerId(int team_id)
         {
             try
