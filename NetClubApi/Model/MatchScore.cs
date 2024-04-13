@@ -36,7 +36,7 @@ namespace NetClubApi.Model
         public MatchSetScore TeamTwoSetScore { get; set; }
 
     }
-    public class  MatchScoreWrapper
+    public class MatchScoreWrapper
     {
         public int MatchId { get; set; }
         public int Team1Score { get; set; }
@@ -55,12 +55,31 @@ namespace NetClubApi.Model
         public int team1_id { get; set; }
         public int team2_id { get; set; }
         public List<MatchSet> sets { get; set; }
-       // public List<(int set_number, int team1_score, int team2_score)> sets { get; set; }
+        // public List<(int set_number, int team1_score, int team2_score)> sets { get; set; }
     }
     public class MatchSet
     {
         public int set_number { get; set; }
         public int team1score { get; set; }
         public int team2score { get; set; }
+    }
+
+    public class MatchDetails
+    {
+        public int match_id { get; set; }
+        public int defaultBy { get; set; }
+        public int retiredBy { get; set; }
+        public MatchSetScore TeamOneSetScore { get; set; }
+
+        public MatchSetScore TeamTwoSetScore { get; set; }
+
+
+    }
+    public class Winner
+        {
+            public int winner { get; set; }
+    public int set { get; set; }
+    public int team1SumOfSetScore { get; set; }
+    public int team2SumOfSetScore { get; set; }
     }
 }

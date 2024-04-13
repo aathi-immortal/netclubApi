@@ -12,3 +12,4 @@ select count(*) from match where court_id = 4;
 select count(*) from match where court_id = 43;
 select count(*) from match where court_id = 44;
 select count(*) from match where court_id = 49;
+select * from match where league_id = 30;

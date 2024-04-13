@@ -4,6 +4,8 @@ using NetClubApi.Model.ResponseModel;
 using Org.BouncyCastle.Utilities;
 using NetClubApi.Modules.LeagueModule;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection;
 
 namespace NetClubApi.Modules.MatchModule
 {
@@ -13,11 +15,11 @@ namespace NetClubApi.Modules.MatchModule
         public Task<string> CreateSchedule(MatchModel match);
         public Task<List<Schedule>> GetSchedule(int league_id);
         public Task<List<Schedule>> getMyMatches(int user_id);
-        public Task<String> ScheduleMatch(int clubId, int leagueId);
+        public Task<string> ScheduleMatch(int clubId, int leagueId);
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
         public Task<int> getTeamPlayerId(TeamModel playerOne);
         public  Task<bool> isAlreadyScheduled(int leagueId);
-        Task<string> SaveScore(MatchScoreInputModel inputModel);
+        Task<string> SaveScore(MatchDetails matchDetails);
         Task<MatchScoreSummary> GetMatchScoreSummary(int match_id);
         public Task<List<MatchModel>> CourtScheduling(List<MatchModel> matches, List<TeamModel> teams);
     }
@@ -46,7 +48,7 @@ namespace NetClubApi.Modules.MatchModule
             return await _matchDataAccess.getMyMatches(user_id);
         }
 
-        public async Task<String> ScheduleMatch(int clubId, int leagueId)
+        public async Task<string> ScheduleMatch(int clubId, int leagueId)
         {
 
             //retrive all the teams in the league
@@ -386,21 +388,10 @@ pair.Key,pair.Value);
         }
 
 
-        public async Task<string> SaveScore(MatchScoreInputModel inputModel)
+        public async Task<string> SaveScore(MatchDetails matchDetailes)
         {
-            //bool setExists = await _matchDataAccess.CheckSetExists(inputModel.MatchId, inputModel.SetNumber);
-            //if (setExists)
-            //{
-            //    return "Set number already exists for this match.";
-            //}
-
-            //MatchScore matchScore = new MatchScore
-            //{
-            //    match_id = inputModel.MatchId,
-            //    set_number = inputModel.SetNumber,
-            //    team1 = inputModel.Team1Score,
-            //    team2 = inputModel.Team2Score
-            //};
+            
+            MatchScoreInputModel inputModel = await calculateScore(matchDetailes);
             MatchScoreWrapper matchScore = new MatchScoreWrapper
             {
                 MatchId = inputModel.MatchId,
@@ -428,8 +419,9 @@ pair.Key,pair.Value);
             {
                 MatchId = inputModel.MatchId,
                 Set = 1,
-                TeamOneScore = inputModel.TeamOneSetScore.SetScores[0],
-                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[0],
+                TeamOneScore = matchDetailes.TeamOneSetScore.SetScores[0],
+                TeamTwoScore = matchDetailes.TeamTwoSetScore.SetScores[0],
+                
                 
             };
 
@@ -438,8 +430,8 @@ pair.Key,pair.Value);
             {
                 MatchId = inputModel.MatchId,
                 Set = 2,
-                TeamOneScore = inputModel.TeamOneSetScore.SetScores[1],
-                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[1],
+                TeamOneScore = matchDetailes.TeamOneSetScore.SetScores[1],
+                TeamTwoScore = matchDetailes.TeamTwoSetScore.SetScores[1],
 
             };
             result = await _matchDataAccess.SaveSetScore(setScore);
@@ -447,8 +439,8 @@ pair.Key,pair.Value);
             {
                 MatchId = inputModel.MatchId,
                 Set = 3,
-                TeamOneScore = inputModel.TeamOneSetScore.SetScores[2],
-                TeamTwoScore = inputModel.TeamTwoSetScore.SetScores[2],
+                TeamOneScore = matchDetailes.TeamOneSetScore.SetScores[2],
+                TeamTwoScore = matchDetailes.TeamTwoSetScore.SetScores[2],
 
             };
 
@@ -467,6 +459,232 @@ pair.Key,pair.Value);
 
         }
 
+        public async  Task<MatchScoreInputModel> calculateScore(MatchDetails matchDetailes)
+        {
+            MatchScoreInputModel result = new();
+            
+            //case 1 (somebody give default)
+            if(matchDetailes.defaultBy != 0)
+            {
+                result = SetScoreAndRatingForDefault(matchDetailes);
+            }
+            //case 2 (somebody give retired)
+            else if(matchDetailes.retiredBy != 0)
+            {
+                result = SetScoreAndratingForRetired(matchDetailes);
+            }
+            //cae3 normal case
+            else
+            {
+
+                result = SetPointAndRating(matchDetailes);
+            }
+            result.MatchId = matchDetailes.match_id;
+            return result;
+        }
+
+        private MatchScoreInputModel SetPointAndRating(MatchDetails matchDetailes)
+        {
+            Winner winnerDetails = WinnerCalculation(matchDetailes);
+            MatchScoreInputModel result = PointAndScoreCalculation(winnerDetails);
+            return result;
+
+
+        }
+
+        private MatchScoreInputModel PointAndScoreCalculation(Winner winnerDetails)
+        {
+            int team1Point = 0;
+            int team2Point = 0;
+            int team1Rating = 0;
+            int team2Rating = 0;
+            if (winnerDetails.winner == 1)
+            {
+                team1Point = getWinnerPoint(winnerDetails);
+                team2Point = getLosserPoint(winnerDetails);
+            }
+            else
+            {
+                team1Point = getLosserPoint(winnerDetails);
+                team2Point = getWinnerPoint(winnerDetails);
+
+            }
+            team1Rating = getRating(team1Point, team2Point);
+            team2Rating = getRating(team2Point, team1Point);
+            MatchScoreInputModel result = new()
+            {
+                Team1Score = team1Point,
+                Team1Rating = team1Rating,
+                Team2Score = team2Point,
+                Team2Rating = team2Rating,
+                WinningTeam = winnerDetails.winner,
+                WinByDefault = 0,
+                TeamRetired = 0,
+                
+                
+            };
+            return result;
+        }
+
+        private int getRating(int team1Point, int team2Point)
+        {
+            return team1Point - team2Point;
+        }
+
+        private int getLosserPoint(Winner winnerDetails)
+        {
+            if (winnerDetails.winner == 1)
+            {
+                return winnerDetails.team2SumOfSetScore <= 8 ? winnerDetails.team2SumOfSetScore : 8;
+            }
+            return winnerDetails.team1SumOfSetScore <= 8 ? winnerDetails.team1SumOfSetScore : 8;
+        }
+
+        private int getWinnerPoint(Winner winnerDetails)
+        {
+            if ((winnerDetails.set) == 2)
+            {
+                return 14;
+            }
+            else
+            {
+                return 12;
+            }
+        }
+
+        private Winner WinnerCalculation(MatchDetails matchDetailes)
+        {
+            int teamOneWinningCount = 0;
+            int teamTwoWinngCount = 0;
+            int winnerTeam = 0;
+            // int setArray
+            int set =0;
+            int team1SumOfSetScore = 0;
+             int team2SumOfSetScore = 0;
+            while (true)
+            {
+
+                int setWinner = getSetWinner(matchDetailes.TeamOneSetScore.SetScores[set], matchDetailes.TeamTwoSetScore.SetScores[set]);
+                if (setWinner == 1)
+                {
+                    teamOneWinningCount += 1;
+                }
+                else if (setWinner == 2)
+                {
+                    teamTwoWinngCount += 1;
+                }
+                else
+                {
+                    winnerTeam = 0;
+                    break;
+                }
+                winnerTeam = getWinner(teamOneWinningCount, teamTwoWinngCount);
+
+                team1SumOfSetScore += matchDetailes.TeamOneSetScore.SetScores[set];
+                team2SumOfSetScore += matchDetailes.TeamTwoSetScore.SetScores[set];
+
+                if (winnerTeam > 0)
+                {
+                    break;
+                }
+                set++;
+
+
+            }
+            return new Winner()
+            {
+                winner = winnerTeam,
+                set = set + 1,
+                team1SumOfSetScore = team1SumOfSetScore,
+                team2SumOfSetScore = team2SumOfSetScore
+            };
+
+        }
+
+        private int getWinner(int teamOneWinningCount, int teamTwoWinngCount)
+        {
+            if(teamOneWinningCount >= 2)
+            {
+                return 1;
+            }
+            else if(teamTwoWinngCount >= 2)
+            {
+                return 2;
+            }
+            return 0;
+        }
+
+        private int getSetWinner(int v1, int v2)
+        {
+            if (v1 < 0)
+            {
+                return 0;
+            }
+            else if (v1 > v2)
+            {
+                return 1;
+            }
+            else
+                return 2;
+        }
+
+        private MatchScoreInputModel SetScoreAndratingForRetired(MatchDetails matchDetailes)
+        {
+            int team1Point = 0;
+            int team2Point = 0;
+            int team1Rating = 0;
+            int team2Rating = 0;
+            Winner winner = WinnerCalculation(matchDetailes);
+            int winnerTeam= 0;
+            team1Point=  winner.team1SumOfSetScore <= 14 ? winner.team1SumOfSetScore : 14;
+            team2Point = winner.team2SumOfSetScore <= 14 ? winner.team2SumOfSetScore : 14;
+            team1Rating = getRating(team1Point, team2Point);
+            team2Rating = getRating(team2Point, team1Point);
+            return new MatchScoreInputModel()
+            {
+                Team1Score = team1Point,
+                Team1Rating = team1Rating,
+                Team2Score = team2Point,
+                Team2Rating = team2Rating,
+                WinningTeam = 0,
+                WinByDefault = 0,
+                TeamRetired = matchDetailes.retiredBy
+            };
+        }
+
+        private MatchScoreInputModel SetScoreAndRatingForDefault(MatchDetails matchDetails)
+        {
+            int team1Point = 0;
+            int team2Point = 0;
+            int team1Rating = 0;
+            int team2Rating = 0;
+            int winner = 0;
+            if(matchDetails.defaultBy == 1)
+            {
+                team1Point = 0;
+                team2Point = 12;
+                winner = 2;
+
+            }
+            else
+            {
+                team2Point = 0;
+                team1Point = 12;
+                winner = 1;
+            }
+            team1Rating = 0;
+            team2Rating = 0;
+            return new MatchScoreInputModel()
+            {
+                Team1Score = team1Point,
+                Team1Rating = team1Rating,
+                Team2Score = team2Point,
+                Team2Rating = team2Rating,
+                WinningTeam = winner,
+                WinByDefault = matchDetails.defaultBy,
+                TeamRetired = 0
+            };
+        }
 
         public async Task<MatchScoreSummary> GetMatchScoreSummary(int match_id)
 

@@ -43,9 +43,10 @@ namespace NetClubApi.Modules.MatchModule
         }
 
         [HttpPut("SaveScore")]
-        public async Task<IActionResult> SaveScore(MatchScoreInputModel inputModel)
+        public async Task<IActionResult> SaveScore(MatchDetails matchDetails)
         {
-            var result = await _matchBussinessLogics.SaveScore(inputModel);
+
+            var result = await _matchBussinessLogics.SaveScore(matchDetails);
             return Ok(result);
         }
 
