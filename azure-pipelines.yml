@@ -1,0 +1,68 @@
+
+
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'dotnet build $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    feedsToUse: 'select'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+
+
+
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
+
+# this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'myWebsite'    
+- task: DownloadPipelineArtifact@2
+  inputs:
+    artifactName: 'myWebsite' # Specify the name of your artifact
+    targetPath: '$(Pipeline.Workspace)'    
+
+# - task: AzureRmWebAppDeployment@4
+#   inputs:
+#     ConnectionType: 'AzureRM'
+#     azureSubscription: 'Azure for Students(1)(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
+#     appType: 'webApp'
+#     WebAppName: 'webappbuild'
+    
+#     packageForLinux: '$(Pipeline.Workspace)/HelloWorldApp.Web.zip'
+  
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure for Students(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
+    appType: 'webApp'
+    WebAppName: 'webappbuild'
+    packageForLinux: '$(Pipeline.Workspace)/NetClubApi.zip'
+
+    
