@@ -57,12 +57,12 @@ steps:
     
 #     packageForLinux: '$(Pipeline.Workspace)/HelloWorldApp.Web.zip'
   
+
+
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Azure for Students(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
     appType: 'webApp'
     WebAppName: 'webappbuild'
-    packageForLinux: '$(Pipeline.Workspace)/NetClubApi.zip'
-
-    
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
