@@ -4,15 +4,9 @@
 
 /.vs
 /NetClubApi/obj
+/NetClubApi/bin/
 /NetClubApi/bin/Debug/net7.0
 
-################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
-/NetClubApi/obj
-/NetClubApi/bin/Debug/net7.0
 
 # Visual Studio temporary files
 .vs/
@@ -102,4 +96,3 @@ Model.*
 # Node.js
 node_modules/
 npm-debug.log
-

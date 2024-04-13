@@ -56,18 +56,16 @@ namespace NetClubApi.Modules.MatchModule
             {
                 if(! await isAlreadyScheduled(leagueId))
                 {
-                    Console.WriteLine(clubId + " " + leagueId);
+                    
                     List<TeamModel> listOfTeams = await _leagueBussinessLayer.GetLeagueTeams(leagueId);
-
                     //mathc scheduling
-                    List<MatchModel> matches = await SchedulingLogic(listOfTeams, clubId, leagueId);
-                    Console.WriteLine("size fo matches   " + matches.Count);
+                    List<MatchModel> matchmodels = await SchedulingLogic(listOfTeams, clubId, leagueId);
+                    
                     //court scheduling
-                    matches = await CourtScheduling(matches,listOfTeams);
-
-
-                    await createMatches(matches);
-                    return "Match Scheduled Successfully";
+                    List<MatchModel> matches = await CourtScheduling(matchmodels, listOfTeams);
+                    string msg=await createMatches(matches);
+                    Console.WriteLine(msg);
+                    return msg;
                 }
                 return "Match is Already Scheduled";
                 
@@ -76,18 +74,15 @@ namespace NetClubApi.Modules.MatchModule
             {
                 throw ;
             }
-            
-
-
         }
 
-        private async Task createMatches(List<MatchModel> matches)
+        private async Task<string> createMatches(List<MatchModel> matches)
         {
             foreach(MatchModel match in matches)
             {
                 await _matchDataAccess.createMatch(match);
             }
-            
+            return "Match Scheduled Successfully";
 
         }
 
@@ -99,8 +94,6 @@ namespace NetClubApi.Modules.MatchModule
         public async Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId)
         {
             List<MatchModel> listOfMatch = new();
-            Console.WriteLine(clubId + " " + leagueId);
-
             List<TeamModel> teamsList = new List<TeamModel>();
             for (int i = 0; i < listOfTeams.Count; i++)
             {
@@ -157,7 +150,6 @@ pair.Key,pair.Value);
                         match.league_id = leagueId;
                         
                         listOfMatch.Add(match);
-                       // Console.WriteLine(match.league_id);
                     }
 
                 }
@@ -201,7 +193,6 @@ pair.Key,pair.Value);
 
             
             int homeCourtLimit = matches.Count/teams.Count;
-            Console.WriteLine("court " + homeCourtLimit);
             Dictionary<int, int> courts = new();
             
             foreach(TeamModel team in teams)
@@ -251,10 +242,6 @@ pair.Key,pair.Value);
 
 
                 int minteamid = listofminteammatches[0].team1_id == listofminteammatches[0].court_id ? listofminteammatches[0].team2_id : listofminteammatches[0].team1_id;
-
-                Console.WriteLine("min " + minteamid);
-                Console.WriteLine("max " + maxteamid);
-                Console.WriteLine("min size " + listofminteammatches.Count);
                 foreach (MatchModel match in listofminteammatches)
                 {
 
@@ -282,7 +269,7 @@ pair.Key,pair.Value);
                 }
             }
 
-            PlayerIdToCourtId(matches);
+            matches=await PlayerIdToCourtId(matches);
             return matches;
                 
 
@@ -291,7 +278,7 @@ pair.Key,pair.Value);
 
         }
 
-        private async void PlayerIdToCourtId(List<MatchModel> matches)
+        private async Task<List<MatchModel>> PlayerIdToCourtId(List<MatchModel> matches)
         {
             
             foreach(MatchModel match in matches)
@@ -299,7 +286,7 @@ pair.Key,pair.Value);
                 match.court_id = await _matchDataAccess.getCourtId(match.court_id);
 
             }
-
+            return matches;
         }
 
         private bool search(int team2_id,List<MatchModel> matches,int minTeamId)
@@ -357,7 +344,7 @@ pair.Key,pair.Value);
                 }
 
             }
-            Console.WriteLine("min" + minCourtsTeamId);
+            
             List<MatchModel> listOfMatches = new();
             foreach (MatchModel match in matches)
             {

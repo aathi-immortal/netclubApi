@@ -52,8 +52,6 @@ namespace NetClubApi.Modules.MatchModule
                         cmd.Parameters.AddWithValue("@Point", 0);
                         cmd.Parameters.AddWithValue("@Rating", 0);
 
-                        Console.WriteLine(match.club_id);
-                    Console.WriteLine(match.league_id);
                         cmd.ExecuteNonQuery();
                     }
                     myCon.Close();
@@ -76,6 +74,8 @@ namespace NetClubApi.Modules.MatchModule
                     myCon.Open();
                     string sql2 = $@"SELECT 
     [dbo].[match].match_id,
+    [dbo].[match].league_id,
+    [dbo].[match].winning_team,
     team1_id,
     Team1.team_name Team1name,
     team2_id,
@@ -108,6 +108,8 @@ where [dbo].[match].league_id={league_id}";
                                 Schedule schedule = new Schedule
                                 {
                                     match_id = (int)reader["match_id"],
+                                    league_id = (int)reader["league_id"],
+                                    winning_team = (int)reader["winning_team"],
                                     team1 = new Team { team_id = (int)reader["team1_id"], team_name = (string)reader["team1name"] },
                                     team2 = new Team { team_id = (int)reader["team2_id"], team_name = (string)reader["team2name"] },
                                     start_date = $"{(DateTime)reader["start_date"]}",
@@ -149,8 +151,11 @@ where [dbo].[match].league_id={league_id}";
 select [dbo].[match].match_id,
 team1.team_id team1_id,team1.team_name team1name,
 team2.team_id team2_id,team2.team_name team2name,
+[dbo].[team_member].team_id myteamid,
 [dbo].[match].start_date start_date,
 [dbo].[match].end_date end_date,
+[dbo].[match].league_id,
+[dbo].[match].winning_team,
 [dbo].[match].point,
 [dbo].[match].team1_point,
 [dbo].[match].team1_rating,
@@ -165,16 +170,27 @@ JOIN[dbo].[team_member] ON team1.team_id= [dbo].[team_member].team_id or team2.t
 where[dbo].[team_member].team_member_user_id={user_id}";
                     using (SqlCommand myCommand = new SqlCommand(sql3, myCon))
                     {
+                        Boolean isGetMyTeamId = true;
+                        int myteamid = 0;
                         SqlDataReader reader = myCommand.ExecuteReader();
                         if (reader.HasRows)
                         {
                             while (reader.Read())
                             {
+                                if (isGetMyTeamId)
+                                {
+                                    myteamid = (int)reader["myteamid"];
+                                    isGetMyTeamId = false;
+                                }
                                 Schedule match = new Schedule
                                 {
                                     match_id = (int)reader["match_id"],
-                                    team1 = new Team { team_id = (int)reader["team1_id"], team_name = (string)reader["team1name"] },
-                                    team2 = new Team { team_id = (int)reader["team2_id"], team_name = (string)reader["team2name"] },
+                                    league_id = (int)reader["league_id"],
+                                    winning_team = (int)reader["winning_team"],
+                                    team1 = (myteamid == (int)reader["team1_id"])?new Team { team_id = (int)reader["team1_id"], team_name = (string)reader["team1name"] }: new Team { team_id = (int)reader["team2_id"], team_name = (string)reader["team2name"] },
+
+                                    team2 = (myteamid == (int)reader["team2_id"]) ? new Team { team_id = (int)reader["team1_id"], team_name = (string)reader["team1name"] } : new Team { team_id = (int)reader["team2_id"], team_name = (string)reader["team2name"] },
+
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
