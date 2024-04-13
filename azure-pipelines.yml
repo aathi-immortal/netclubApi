@@ -65,4 +65,4 @@ steps:
     azureSubscription: 'Azure for Students(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
     appType: 'webApp'
     WebAppName: 'webappbuild'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(Pipeline.Workspace)/NetClubApi.zip'
