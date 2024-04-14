@@ -81,20 +81,22 @@ namespace NetClubApi.Modules.TeamModule
 
                 int my_team_id = await _teamDataAccess.CreateTeam(team, team_doubles.player1);
 
-                string club_label = await _clubDataAccess.getClubLabel(team.club_id);
+               // string club_label = await _clubDataAccess.getClubLabel(team.club_id);
 
-                Club club = new Club
+               /* Club club = new Club
                 {
                     club_label = club_label
                 };
-                string clubreg = await _clubDataAccess.ClubRegistration(club.club_label, team_doubles.player2);
+                string clubreg = await _clubDataAccess.ClubRegistration(club.club_label, team_doubles.player2);*/
 
-                if (my_team_id != -1 && my_team_id != -2 && clubreg != null)
+                if (my_team_id != -1 && my_team_id != -2)
                 {
                     AddMember member = new AddMember
                     {
                         team_id = my_team_id,
-                        team_member_user_id = [team_doubles.player2]
+                        league_id=team_doubles.league_id,
+                        club_id=team_doubles.club_id,
+                        team_member_user_id = team_doubles.player2
                     };
                     await AddTeamMember(member);
                 }
