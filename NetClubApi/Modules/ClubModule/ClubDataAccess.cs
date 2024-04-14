@@ -98,6 +98,7 @@ namespace NetClubApi.Modules.ClubModule
                 clubRegistration.club_id = registerclub.Entity.Id;
 
                 clubRegistration.isadmin = true;
+                clubRegistration.join_date = DateTime.Now;
                 await _netClubDbContext.AddAsync(clubRegistration);
                 await _netClubDbContext.SaveChangesAsync();
 

@@ -22,6 +22,7 @@ namespace NetClubApi.Modules.MatchModule
 
         public Task<MatchScoreSummary> GetMatchScoreSummary(int matchId);
         public Task<List<MatchScoreSummary>> GetLeagueScores(int league_id);
+       // public Task<int> getTeamId(winner, match_id);
 
 
     }
