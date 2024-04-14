@@ -34,7 +34,7 @@ namespace NetClubApi.Modules.LeagueModule
         public async Task<string> CreateLeague(League league, int user_id)
         {
             try 
-            {
+            { 
                 if (await IsAdmin(league.club_id, user_id))
                 {
                     await netClubDbContext.AddAsync(league);
