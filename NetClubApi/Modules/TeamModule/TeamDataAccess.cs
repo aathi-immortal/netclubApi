@@ -52,7 +52,6 @@ namespace NetClubApi.Modules.TeamModule
                         Console.WriteLine("Inserted row ID:1");
                     }
 
-                   // string leagueRegistration = $@"insert into [dbo].[league_registration] values(@culb_id,@league_id,@user_id)";
                     string leagueRegistration = $@"INSERT INTO [dbo].[league_registration] (club_id,league_id,user_id)
                                    VALUES ('{team.club_id}','{team.league_id}','{user_id}')";
                     using (SqlCommand cmd3 = new SqlCommand(leagueRegistration, myCon))
@@ -73,34 +72,41 @@ namespace NetClubApi.Modules.TeamModule
 
         public Task<string> AddMember(AddMember team)
         {
-
             try
             {
-                List<int>members= team.team_member_user_id.ToList();
-                int member_count = members.Count;
-                if (member_count > 0)
-                {
+                int member= team.team_member_user_id;
                     using (SqlConnection myCon = sqlHelper.GetConnection())
                     {
-                        myCon.Open();
+                     myCon.Open();
+                     
+                    string sql1 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id, team_id)
+                                   VALUES ('{member}','{team.team_id}')";
+                     using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
+                     {
+                         myCommand1.ExecuteNonQuery();
+                     }
 
-                        //inserting new team in the team table
-                        for (int i = 0; i < member_count; i++)
-                        {
-                            string sql1 = $@"INSERT INTO [dbo].[team_member] (team_member_user_id, team_id)
-                                   VALUES ('{members[i]}','{team.team_id}')";
-                            using (SqlCommand myCommand1 = new SqlCommand(sql1, myCon))
-                            {
-                                myCommand1.ExecuteNonQuery();
-                            }
-                        }
+                     string leagueUpdate = $@"update [dbo].[league] set number_of_teams = number_of_teams + 1 where id = @League_id";
+                    using (SqlCommand cmd1 = new SqlCommand(leagueUpdate, myCon))
+                     {
+                        cmd1.Parameters.AddWithValue("@League_id", team.league_id);
+                        cmd1.ExecuteNonQuery();
+                        Console.WriteLine("Inserted row ID:1");
+                     }
 
-                        //updating league table
-                        
-                        myCon.Close();
+                    string leagueRegistration = $@"INSERT INTO [dbo].[league_registration] (club_id,league_id,user_id)
+                                   VALUES ('{team.club_id}','{team.league_id}','{member}')";
+                    using (SqlCommand cmd3 = new SqlCommand(leagueRegistration, myCon))
+                    {
+                        cmd3.ExecuteNonQuery();
+                        Console.WriteLine("Inserted row ID:2");
+                    }
+
+
+                    myCon.Close();
 
                     }
-                }
+                
                 return Task.FromResult("Team member added");
             }
             catch (Exception ex)

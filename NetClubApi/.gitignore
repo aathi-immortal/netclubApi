@@ -3,6 +3,6 @@
 ################################################################################
 
 /.vs
-NetClubApi/obj
-NetClubApi/bin/Debug/net8.0
-NetClubApi/bin
+/obj
+/bin/Debug/net8.0
+/bin

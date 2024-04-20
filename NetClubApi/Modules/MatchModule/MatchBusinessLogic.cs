@@ -14,6 +14,7 @@ namespace NetClubApi.Modules.MatchModule
     {
         public Task<string> CreateSchedule(MatchModel match);
         public Task<List<Schedule>> GetSchedule(int league_id);
+
         public Task<List<Schedule>> getMyMatches(int user_id);
         public Task<string> ScheduleMatch(int clubId, int leagueId);
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
@@ -422,28 +423,24 @@ pair.Key,pair.Value);
 
             };
             result = await _matchDataAccess.SaveSetScore(setScore);
-            setScore = new MatchSetScoreWrapper
+            int team1score3 = matchDetailes.TeamOneSetScore.SetScores[2];
+            int team2score3 = matchDetailes.TeamTwoSetScore.SetScores[2];
+            Console.WriteLine(team1score3);
+            Console.WriteLine(team2score3);
+            if (team1score3!=0 || team2score3 != 0)
             {
-                MatchId = inputModel.MatchId,
-                Set = 3,
-                TeamOneScore = matchDetailes.TeamOneSetScore.SetScores[2],
-                TeamTwoScore = matchDetailes.TeamTwoSetScore.SetScores[2],
+                setScore = new MatchSetScoreWrapper
+                {
+                    MatchId = inputModel.MatchId,
+                    Set = 3,
+                    TeamOneScore = team1score3,
+                    TeamTwoScore = team2score3,
+                };
 
-            };
-
-            result = await _matchDataAccess.SaveSetScore(setScore);
-
-
-
-
-
-
-
+                Console.WriteLine("Hello");
+                result = await _matchDataAccess.SaveSetScore(setScore);
+            }
             return result;
-            //store in the match table 
-
-            
-
         }
 
         public async  Task<MatchScoreInputModel> calculateScore(MatchDetails matchDetailes)
@@ -621,10 +618,26 @@ pair.Key,pair.Value);
             int team2Point = 0;
             int team1Rating = 0;
             int team2Rating = 0;
+            int winnerTeam = 0;
             Winner winner = WinnerCalculation(matchDetailes);
-            int winnerTeam= 0;
-            team1Point=  winner.team1SumOfSetScore <= 14 ? winner.team1SumOfSetScore : 14;
-            team2Point = winner.team2SumOfSetScore <= 14 ? winner.team2SumOfSetScore : 14;
+            if (matchDetailes.retiredBy == 1)
+            {
+                team1Point = winner.team1SumOfSetScore <= 8 ? winner.team2SumOfSetScore : 8;
+                team2Point = winner.team2SumOfSetScore <= 14 ? winner.team2SumOfSetScore : 14;
+                winnerTeam = 2;
+            }
+            else
+            {
+                team1Point = winner.team1SumOfSetScore <= 14 ? winner.team1SumOfSetScore : 14;
+                team2Point = winner.team2SumOfSetScore <= 8 ? winner.team2SumOfSetScore : 8;
+                winnerTeam = 1;
+            }
+
+
+
+
+
+            
             team1Rating = getRating(team1Point, team2Point);
             team2Rating = getRating(team2Point, team1Point);
             return new MatchScoreInputModel()
@@ -633,7 +646,7 @@ pair.Key,pair.Value);
                 Team1Rating = team1Rating,
                 Team2Score = team2Point,
                 Team2Rating = team2Rating,
-                WinningTeam = 0,
+                WinningTeam = winnerTeam,
                 WinByDefault = 0,
                 TeamRetired = matchDetailes.retiredBy
             };
@@ -678,6 +691,10 @@ pair.Key,pair.Value);
         {
             return await _matchDataAccess.GetMatchScoreSummary(match_id);
         }
-
+        private int getTeamId(int winner,int match_id)
+        {
+            //return await _matchDataAccess.getTeamId(winner,match_id);
+            return 0;
+        }
     }
 }

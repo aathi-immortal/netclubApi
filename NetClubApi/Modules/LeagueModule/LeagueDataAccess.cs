@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NetClubApi.Helper;
 using NetClubApi.Model;
 using NetClubApi.Model.ResponseModel;
+using Org.BouncyCastle.Utilities.IO;
 using System.Text.RegularExpressions;
 
 namespace NetClubApi.Modules.LeagueModule
@@ -33,8 +34,8 @@ namespace NetClubApi.Modules.LeagueModule
 
         public async Task<string> CreateLeague(League league, int user_id)
         {
-            try
-            {
+            try 
+            { 
                 if (await IsAdmin(league.club_id, user_id))
                 {
                     await netClubDbContext.AddAsync(league);
@@ -80,6 +81,7 @@ namespace NetClubApi.Modules.LeagueModule
         public async Task<List<userLeague>> GetLeagues(int club_Id,int user_id)
         {
             List<userLeague> leagues = new List<userLeague>();
+            
             using (SqlConnection myCon = sqlHelper.GetConnection())
             {
              
@@ -114,8 +116,6 @@ where [dbo].[league].club_id = '{club_Id}'
                         {
                         while(reader.Read())
                         {
-                            Console.WriteLine(reader.IsDBNull(14));
-                         
                             userLeague league = new userLeague {
                             Id = (int)reader["id"],
                             name = (string)reader["name"],
@@ -237,6 +237,43 @@ where [dbo].[league].club_id = '{club_Id}'
                 return false;
             return true;
 
+        }
+        private async Task<int> getLeagueOwner(int league_id)
+        {
+            int leagueOwner = 0;
+            try
+            {
+                using (SqlConnection myCon = sqlHelper.GetConnection())
+                {
+                    myCon.Open();
+                    string sql2 = $@"
+select  [dbo].[club_registration].user_id,[dbo].[club_registration].club_id,[dbo].[club_registration].isadmin,[dbo].[league].id from [dbo].[league]
+inner join [dbo].[club_registration] on [dbo].[club_registration].club_id=[dbo].[league].club_id and [dbo].[club_registration].isadmin=1
+where league.id={league_id}";
+                    using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                leagueOwner=(int)reader["user_id"];
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                        }
+                        myCon.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            return leagueOwner;
         }
     }
 }

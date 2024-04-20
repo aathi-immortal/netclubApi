@@ -15,7 +15,7 @@ namespace NetClubApi.Model
     }
     public class AddMember:TeamModel
     {
-        public List<int> team_member_user_id { get; set; }
+        public int team_member_user_id { get; set; }
 
     }
     public class TeamDoubles: TeamModel

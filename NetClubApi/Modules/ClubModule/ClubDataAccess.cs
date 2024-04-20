@@ -98,6 +98,7 @@ namespace NetClubApi.Modules.ClubModule
                 clubRegistration.club_id = registerclub.Entity.Id;
 
                 clubRegistration.isadmin = true;
+                clubRegistration.join_date = DateTime.Now;
                 await _netClubDbContext.AddAsync(clubRegistration);
                 await _netClubDbContext.SaveChangesAsync();
 
@@ -334,14 +335,14 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                     using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
                     {
                         SqlDataReader reader = myCommand.ExecuteReader();
-                        
+
                         if (reader.HasRows)
                         {
                             while (reader.Read())
                             {
-                                ClubMember club_mem= new ClubMember
+                                ClubMember club_mem = new ClubMember
                                 {
-                                     user_id= (int)reader["Id"],
+                                    user_id = (int)reader["Id"],
                                     email = (string)reader["email"],
                                     first_name = (string)reader["first_name"],
                                     last_name = (string)reader["last_name"],
@@ -354,11 +355,38 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                         }
                         else
                         {
-                            reader.Close();
                             return [];
                         }
-                        myCon.Close();
+                        reader.Close();
                     }
+                    int clubOwner = 0;
+                    string sql3 = $@"
+select user_id from club_registration where club_id={club_id} and isAdmin=1";
+                    using (SqlCommand myCommand = new SqlCommand(sql3, myCon))
+                    {
+                        SqlDataReader reader = myCommand.ExecuteReader();
+
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                clubOwner = (int)reader["user_id"];
+                            }
+                        }
+                        else
+                        {
+                            reader.Close();
+                        }
+
+                    }
+                    int indexToMove = club_members.FindIndex(clubmem => clubmem.user_id == clubOwner);
+                    if (indexToMove != -1 && indexToMove!=0)
+                    {
+                        ClubMember itemToMove = club_members[indexToMove];
+                        club_members.RemoveAt(indexToMove);
+                        club_members.Insert(0, itemToMove);
+                    }
+                    myCon.Close();
                 }
             }
             catch (Exception ex)
@@ -366,6 +394,7 @@ select [dbo].[club].id,[dbo].[club].club_name,[dbo].[club].created_by,[dbo].[clu
                 Console.WriteLine(ex.Message);
                 return [];
             }
+
             return club_members;
         }
 

@@ -22,6 +22,7 @@ namespace NetClubApi.Modules.MatchModule
 
         public Task<MatchScoreSummary> GetMatchScoreSummary(int matchId);
         public Task<List<MatchScoreSummary>> GetLeagueScores(int league_id);
+       // public Task<int> getTeamId(winner, match_id);
 
 
     }
@@ -177,11 +178,8 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                         {
                             while (reader.Read())
                             {
-                                if (isGetMyTeamId)
-                                {
-                                    myteamid = (int)reader["myteamid"];
-                                    isGetMyTeamId = false;
-                                }
+                                
+                                myteamid = (int)reader["myteamid"]; 
                                 Schedule match = new Schedule
                                 {
                                     match_id = (int)reader["match_id"],
@@ -443,11 +441,8 @@ select [dbo].[match].match_id,[dbo].[match].league_id,[dbo].[match].team1_id,[db
                                     match_score.team1_id = reader.GetInt32(team1IdIndex);
                                     int team2IdIndex = reader.GetOrdinal("team2_id");
                                     match_score.team2_id = reader.GetInt32(team2IdIndex);
-
-
-
-                                    match_scores.Add(match_score);
                                 }
+                                    match_scores.Add(match_score);
                             }
                         }
                         else
