@@ -40,10 +40,19 @@ namespace NetClubApi.Model
         public int team1_rating { get; set; }
         public int team2_point { get; set; }
         public int team2_rating { get; set; }
+        public int player1_id { get; set; }
+        public int player2_id { get; set; }
     }
     public class Team
     {
         public int team_id { get; set; }
         public string team_name { get; set; }
     }
+    public class MyMatch : MatchModel
+    {
+        public int winning_team { get; set; }
+        public string? venue { get; set; }
+        public Team? team1 { get; set; }
+        public Team? team2 { get; set; }
+    } 
 }

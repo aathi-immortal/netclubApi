@@ -38,7 +38,7 @@ namespace NetClubApi.Modules.LeagueModule
 
         [HttpGet]
         [Authorize]
-        public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
+        public async Task<List<LeagueTeam>> GetLeagueTeams(int league_id)
         {
             return await _leagueBussinessLayer.GetLeagueTeams(league_id);
         }

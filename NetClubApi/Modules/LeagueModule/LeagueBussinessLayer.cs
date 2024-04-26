@@ -8,7 +8,7 @@ namespace NetClubApi.Modules.LeagueModule
     {
         public Task<string> CreateLeague(League league,int user_id);
         public Task<List<userLeague>> GetClubLeagues(int club_id,int user_id);
-        public Task<List<TeamModel>> GetLeagueTeams(int league_id);
+        public Task<List<LeagueTeam>> GetLeagueTeams(int league_id);
         public Task<List<LeagueResponse>> ConvertToLeagueResponse(List<League> leagues);
         public Task<string> RegisterLeague(LeagueRegistration league);
         public Task<List<MyLeagues>> GetMyLeagues(int user_id);
@@ -40,7 +40,7 @@ namespace NetClubApi.Modules.LeagueModule
             return leagues;
         }
 
-        public async Task<List<TeamModel>> GetLeagueTeams(int league_id)
+        public async Task<List<LeagueTeam>> GetLeagueTeams(int league_id)
         {
             return await _dataAccess.getLeagueTeams(league_id);
         }

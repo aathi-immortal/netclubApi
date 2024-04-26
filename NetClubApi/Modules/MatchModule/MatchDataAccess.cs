@@ -8,7 +8,7 @@ namespace NetClubApi.Modules.MatchModule
     {
         public Task<string> createMatch(MatchModel match);
         public Task<List<Schedule>> getSchedule(int league_id);
-        public Task<List<Schedule>> getMyMatches(int user_id);
+        public Task<List<MyMatch>> getMyMatches(int user_id);
         
         public Task<int> GetTeamPlayerId(int team_id);
         public Task<bool> isAlreadyScheduled(int leagueId);
@@ -84,6 +84,8 @@ namespace NetClubApi.Modules.MatchModule
     [dbo].[match].start_date start_date,
     [dbo].[match].end_date end_date,
     [dbo].[match].point,
+[dbo].[match].player1_id,
+[dbo].[match].player2_id,
 [dbo].[match].team1_point,
 [dbo].[match].team1_rating,
 [dbo].[match].team2_point,
@@ -116,6 +118,8 @@ where [dbo].[match].league_id={league_id}";
                                     start_date = $"{(DateTime)reader["start_date"]}",
                                     end_date = $"{(DateTime)reader["end_date"]}",
                                     score = (int)reader["point"],
+                                    player1_id = (int)reader["player1_id"],
+                                    player2_id = (int)reader["player2_id"],
                                     venue = (string)reader["court_name"],
                                     team1_point = (int)reader["team1_point"],
                                     team1_rating = (int)reader["team1_rating"],
@@ -140,9 +144,10 @@ where [dbo].[match].league_id={league_id}";
             }
             return Task.FromResult(schedules);
         }
-        public Task<List<Schedule>> getMyMatches(int user_id)
+        public Task<List<MyMatch>> getMyMatches(int user_id)
         {
-            List<Schedule> matches = new List<Schedule>();
+          //  List<Schedule> matches = new List<Schedule>();
+            List<MyMatch> matches = new List<MyMatch>();
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
@@ -156,12 +161,17 @@ team2.team_id team2_id,team2.team_name team2name,
 [dbo].[match].start_date start_date,
 [dbo].[match].end_date end_date,
 [dbo].[match].league_id,
+[dbo].[match].club_id,
+[dbo].[match].team1_id,
+[dbo].[match].team2_id,
 [dbo].[match].winning_team,
 [dbo].[match].point,
 [dbo].[match].team1_point,
 [dbo].[match].team1_rating,
 [dbo].[match].team2_point,
 [dbo].[match].team2_rating,
+[dbo].[match].player1_id,
+[dbo].[match].player2_id,
 [dbo].[court].court_name court_name 
 from [dbo].[match] 
 JOIN [dbo].[team] team1 ON team1.team_id=[dbo].[match].team1_id
@@ -180,7 +190,7 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                             {
                                 
                                 myteamid = (int)reader["myteamid"]; 
-                                Schedule match = new Schedule
+                                /*Schedule match = new Schedule
                                 {
                                     match_id = (int)reader["match_id"],
                                     league_id = (int)reader["league_id"],
@@ -197,6 +207,27 @@ where[dbo].[team_member].team_member_user_id={user_id}";
                                     team1_rating = (int)reader["team1_rating"],
                                     team2_point = (int)reader["team2_point"],
                                     team2_rating = (int)reader["team2_rating"]
+                                };*/
+                                MyMatch match = new MyMatch
+                                {
+                                    match_id = (int)reader["match_id"],
+                                    league_id = (int)reader["league_id"],
+                                    club_id = (int)reader["club_id"],
+                                    winning_team = (int)reader["winning_team"],
+                                    team1 = new Team { team_id = (int)reader["team1_id"],                       team_name = (string)reader["team1name"] },
+                                    team2 =new Team { team_id = (int)reader["team2_id"],                       team_name = (string)reader["team2name"] },
+                                    start_date = (DateTime)reader["start_date"],
+                                    end_date =(DateTime)reader["end_date"],
+                                    point = (int)reader["point"],
+                                    venue = (string)reader["court_name"],
+                                    team1_point = (int)reader["team1_point"],
+                                    team1_rating = (int)reader["team1_rating"],
+                                    team2_point = (int)reader["team2_point"],
+                                    team2_rating = (int)reader["team2_rating"],
+                                    player1_id = (int)reader["player1_id"],
+                                    player2_id = (int)reader["player2_id"],
+                                    team1_id= (int)reader["team1_id"],
+                                    team2_id = (int)reader["team2_id"]
                                 };
                                 matches.Add(match);
                             }

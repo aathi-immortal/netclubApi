@@ -15,7 +15,7 @@ namespace NetClubApi.Modules.LeagueModule
         public Task<string> CreateLeague(League league, int user_id);
         public Task<League> GetLeague(int league_id);
         public Task<List<userLeague>> GetLeagues(int club_id,int user_id);
-        Task<List<TeamModel>> getLeagueTeams(int league_id);
+        Task<List<LeagueTeam>> getLeagueTeams(int league_id);
         public Task<List<LeagueRegistration>> GetMyLeagues(int user_id);
         Task<int?> getNumberOfMatches(int league_id);
         public Task<bool> IsAdmin(int? club_id, int user_id);
@@ -142,16 +142,29 @@ where [dbo].[league].club_id = '{club_Id}'
             return leagues;
         }
 
-        public async Task<List<TeamModel>> getLeagueTeams(int league_id)
+        public async Task<List<LeagueTeam>> getLeagueTeams(int league_id)
         {
             //League league = await netClubDbContext.league.FirstOrDefaultAsync(league => league.Id == league_id);
-            List<TeamModel> teams = new List<TeamModel>();
+            List<LeagueTeam> teams = new List<LeagueTeam>();
             try
             {
                 using (SqlConnection myCon = sqlHelper.GetConnection())
                 {
                     myCon.Open();
-                    string sql2 = $@"select * from [dbo].[team] where league_id={league_id}";
+                    string sql2 = $@"
+select 
+[dbo].[team].team_id,
+[dbo].[team].club_id,
+[dbo].[team].league_id,
+[dbo].[team].team_name,
+[dbo].[team].court_id,
+[dbo].[team].points,
+[dbo].[team].rating,
+[dbo].[team_member].team_member_user_id,
+[dbo].[court].court_name from [dbo].[team] 
+inner join  [dbo].[court] on [dbo].[court].court_id=[dbo].[team].court_id
+inner join [dbo].[team_member] on [dbo].[team_member].team_id=[dbo].[team].team_id
+where league_id={league_id}";
                     using (SqlCommand myCommand = new SqlCommand(sql2, myCon))
                     {
                         SqlDataReader reader = myCommand.ExecuteReader();
@@ -159,7 +172,7 @@ where [dbo].[league].club_id = '{club_Id}'
                         {
                             while (reader.Read())
                             {
-                                TeamModel team = new TeamModel
+                                LeagueTeam team = new LeagueTeam
                                 {
                                     team_id = (int)reader["team_id"],
                                     club_id = (int)reader["club_id"],
@@ -168,6 +181,8 @@ where [dbo].[league].club_id = '{club_Id}'
                                     court_id = (int)reader["court_id"],
                                     points = (int)reader["points"],
                                     rating = (int)reader["rating"],
+                                    court_name = (string)reader["court_name"],
+                                    user_id = (int)reader["team_member_user_id"]
                                 };
                                 teams.Add(team);
                             }

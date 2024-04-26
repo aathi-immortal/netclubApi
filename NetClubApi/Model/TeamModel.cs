@@ -22,6 +22,10 @@ namespace NetClubApi.Model
     {
         public int player1 { get; set; }
         public int player2 { get; set; }
-
+    }
+    public class LeagueTeam : TeamModel
+    {
+        public string? court_name { get; set; }
+        public int? user_id { get; set; }
     }
 }

@@ -63,7 +63,7 @@ namespace NetClubApi.Modules.MatchModule
 
         [HttpGet]
         // [Authorize]
-        public async Task<List<Schedule>> GetMyMatches(int user_id)
+        public async Task<List<MyMatch>> GetMyMatches(int user_id)
         {
             // int user_id = 25;
             return await _matchBussinessLogics.getMyMatches(user_id);

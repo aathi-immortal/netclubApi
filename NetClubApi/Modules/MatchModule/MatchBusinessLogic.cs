@@ -14,8 +14,7 @@ namespace NetClubApi.Modules.MatchModule
     {
         public Task<string> CreateSchedule(MatchModel match);
         public Task<List<Schedule>> GetSchedule(int league_id);
-
-        public Task<List<Schedule>> getMyMatches(int user_id);
+        public Task<List<MyMatch>> getMyMatches(int user_id);
         public Task<string> ScheduleMatch(int clubId, int leagueId);
         public Task<List<MatchModel>> SchedulingLogic(List<TeamModel> listOfTeams, int clubId, int leagueId);
         public Task<int> getTeamPlayerId(TeamModel playerOne);
@@ -44,7 +43,7 @@ namespace NetClubApi.Modules.MatchModule
             return await _matchDataAccess.getSchedule(league_id);
         }
 
-        public async Task<List<Schedule>> getMyMatches(int user_id)
+        public async Task<List<MyMatch>> getMyMatches(int user_id)
         {
             return await _matchDataAccess.getMyMatches(user_id);
         }
@@ -57,8 +56,24 @@ namespace NetClubApi.Modules.MatchModule
             {
                 if(! await isAlreadyScheduled(leagueId))
                 {
-                    
-                    List<TeamModel> listOfTeams = await _leagueBussinessLayer.GetLeagueTeams(leagueId);
+                    List<LeagueTeam> leagueTeams= await _leagueBussinessLayer.GetLeagueTeams(leagueId);
+
+                    List<TeamModel> listOfTeams = new List<TeamModel>();
+                    for(int i = 0; i < leagueTeams.Count; i++)
+                    {
+                        TeamModel team = new TeamModel
+                        {
+                            team_id = leagueTeams[i].team_id,
+                            club_id = leagueTeams[i].club_id,
+                            league_id = leagueTeams[i].league_id,
+                            team_name = leagueTeams[i].team_name,
+                            court_id = leagueTeams[i].court_id,
+                            points = leagueTeams[i].points,
+                            rating = leagueTeams[i].rating
+                        };
+                        listOfTeams.Add(team);
+                    }
+                        //(TeamModel)listofleagueTeam;
                     //mathc scheduling
                     List<MatchModel> matchmodels = await SchedulingLogic(listOfTeams, clubId, leagueId);
                     
