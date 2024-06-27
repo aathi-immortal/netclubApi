@@ -59,10 +59,18 @@ steps:
   
 
 
+# - task: AzureRmWebAppDeployment@4
+#   inputs:
+#     ConnectionType: 'AzureRM'
+#     azureSubscription: 'Azure for Students(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
+#     appType: 'webApp'
+#     WebAppName: 'webappbuild'
+#     packageForLinux: '$(Pipeline.Workspace)/NetClubApi.zip'
+    
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
-    azureSubscription: 'Azure for Students(eb2d0054-1a3c-44dd-8c9f-a1ead62c2720)'
+    azureSubscription: 'Azure for Students(204c4b99-a5ff-4e51-805c-584d9f1efdd0)'
     appType: 'webApp'
-    WebAppName: 'webappbuild'
+    WebAppName: 'netclubUi'
     packageForLinux: '$(Pipeline.Workspace)/NetClubApi.zip'
